@@ -110,7 +110,7 @@
                     </div>
                   </form>
                 </div>
-              </div>
+(              </div>
               </div>
             </div>
               
@@ -139,7 +139,7 @@
                       <td style="text-align: right;">{{(price*closing_cost/100) | currency}}</td>
                     </tr>
                     <tr>
-                      <td ng-init="investment = price*down_payment/100+price*closing_cost/100">
+                      <td ng-init="investment = (price*down_payment/100)+(price*closing_cost/100)">
                         <strong>TOTAL</strong>
                       </td>
                       <td style="text-align: right;">{{investment | currency}}</td>
