@@ -119,7 +119,7 @@
 {{monthly_ins = (insurance/12);""}}
 {{monthly_flood = (flood_insurance/12);""}}
 {{total_payment = (payment + monthly_tax + monthly_flood + monthly_ins + hoa + maintenance);""}}
-              
+{{investment = (price*down_payment/100)+(price*closing_cost/100);""}}              
               
             <div class="panel panel-primary">
               <div class="panel-heading">
@@ -139,7 +139,7 @@
                       <td style="text-align: right;">{{(price*closing_cost/100) | currency}}</td>
                     </tr>
                     <tr>
-                      <td ng-init="investment = (price*down_payment/100)+(price*closing_cost/100)">
+                      <td>
                         <strong>TOTAL</strong>
                       </td>
                       <td style="text-align: right;">{{investment | currency}}</td>
