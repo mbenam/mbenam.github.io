@@ -64,7 +64,7 @@ const createChart = async() => {
            options:{
              title: {
                       display: true,
-                      text: 'Expense by Month'
+                      text: 'Utilities Expense by Month'
                     }
                    }
           
