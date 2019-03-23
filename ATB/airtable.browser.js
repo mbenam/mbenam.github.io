@@ -1,1 +1,0 @@
-../../build/airtable.browser.js
