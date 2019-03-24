@@ -63,6 +63,7 @@
 
   function getRentToWords(){
     var rent = document.getElementById("rent").value;
+    if (rent=="") return;
     var rentStr = numberToWords.toWords(rent);
     rentStr = rentStr[0].toUpperCase()+rentStr.slice(1);
     return(rentStr);
@@ -96,6 +97,7 @@
   
   function writeBtnClick(){
     loadImage();
+    //writeImage();
       
   }
 

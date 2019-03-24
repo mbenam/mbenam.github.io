@@ -11,11 +11,16 @@ var array = ["4758TL1",
 var unitDiv = document.getElementById("unit");
 var selectList = document.createElement("select");
 selectList.setAttribute("id", "unitSelect");
+selectList.setAttribute("class", "mdl-textfield__input");
+
 unitDiv.appendChild(selectList);
+var option = document.createElement("option");
+option.setAttribute("value", "");
+selectList.appendChild(option);
 
 //Create and append the options
 for (var i = 0; i < array.length; i++) {
-    var option = document.createElement("option");
+    option = document.createElement("option");
     option.setAttribute("value", array[i]);
     option.text = array[i];
     selectList.appendChild(option);
