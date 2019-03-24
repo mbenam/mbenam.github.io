@@ -4,45 +4,74 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>repl.it</title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.min.js"></script>
     <script src="misc.js"></script>
     <script src="numberToWords.min.js"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
   </head>
   <body>
-    <div id="tenant">Choose tenant:</div>
-    <script src="tenant.js"></script><p>
-    <div id="unit">Choose unit:</div>
-    <script src="units.js"></script><p>
-    <div id="month">Choose month:</div>
-    <script src="months.js"></script><p>
-    <div>
-      Choose invoice number
-      <select id="invoiceNo">
-        <option value="01">01</option>
-        <option value="02">02</option>
-        <option value="03">03</option>
-      </select>
-    </div><p>
-    <div>
-      Rent paid:<input type="text" id="rent" value="550.00"><p>
-      Previous balance: <input type="text" id="prevBalance" value="0.00"><p>
-      Remaining balance: <input type="text" id="remainingBalance" value="0.00"><p>        
-    </div> 
+    <div id ="tenant" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    <script src="tenant.js"></script>  
+    <label class="mdl-textfield__label" for="Tenant">Tenant</label>
+  </div>
 
-    <div>
-      Select payment type:
-      <select id="paymentType">
+    <div id ="unit" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+      <script src="units.js"></script>  
+      <label class="mdl-textfield__label" for="Unit">Unit</label>
+    </div>
+
+    <div id ="month" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+      <script src="months.js"></script>  
+      <label class="mdl-textfield__label" for="Month">Month</label>
+    </div>
+
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    <select class="mdl-textfield__input" id="invoiceNo" name="invoiceNo">
+      <option></option>
+      <option value="01">01</option>
+      <option value="02">02</option>
+      <option value="03">03</option>
+    </select>
+    <label class="mdl-textfield__label" for="invNo">Invoice No.</label>
+  </div>
+
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    <input class="mdl-textfield__input" type="text" id="rent"/>
+    <label class="mdl-textfield__label" for="rentPaid">Rent Paid</label>
+  </div>
+
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    <input class="mdl-textfield__input" type="text" id="prevBalance"/>
+    <label class="mdl-textfield__label" for="previousBalance">Previous Balance</label>
+  </div>
+
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    <input class="mdl-textfield__input" type="text" id="remainingBalance"/>
+    <label class="mdl-textfield__label" for="remainingBalance">Remaining Balance</label>
+  </div>
+
+
+  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    <select class="mdl-textfield__input" id="paymentType" name="paymentType">
+      <option></option>
         <option value=410>Cash</option>
         <option value=438>Online deposit</option>
         <option value=465>Money Order</option>
         <option value=498>Direct Deposit</option>
-      </select>
-    </div>
+    </select>
+    <label class="mdl-textfield__label" for="paymanetType">Payment Type</label>
+  </div>
+
+
     <p>
     
-    <button id="writeReceipt" onclick="writeBtnClick()">Write Receipt</button><p>
-    <button id="saveReceipt" onclick="saveBtnClick()">Download JPEG</button><p>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="writeReceipt" onclick="writeBtnClick()">Write Receipt</button><p>
+      
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="saveReceipt" onclick="saveBtnClick()">Download JPEG</button><p>
     <!--<button id="savePdfReceipt" onclick="pdfBtnClick()">Download PDF</button><p>-->
 
       
