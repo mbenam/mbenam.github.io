@@ -97,8 +97,23 @@
   
   function writeBtnClick(){
     loadImage();
+    const receiptPanel = document.getElementById('receiptPanel');
+    receiptPanel.style.display="block";
+
+    const inputPanel = document.getElementById('inputPanel');
+    inputPanel.style.display="none";
+
     //writeImage();
       
+  }
+
+  function editBtnClick(){
+    const receiptPanel = document.getElementById('receiptPanel');
+    receiptPanel.style.display="none";
+
+    const inputPanel = document.getElementById('inputPanel');
+    inputPanel.style.display="block";
+
   }
 
   function saveBtnClick(){

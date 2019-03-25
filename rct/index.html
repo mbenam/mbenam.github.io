@@ -14,6 +14,7 @@
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
   </head>
   <body>
+    <div id="inputPanel">
     <div id ="tenant" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
     <script src="tenant.js"></script>  
     <label class="mdl-textfield__label" for="Tenant">Tenant</label>
@@ -70,13 +71,19 @@
     <p>
     
     <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="writeReceipt" onclick="writeBtnClick()">Write Receipt</button><p>
-      
-    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="saveReceipt" onclick="saveBtnClick()">Download JPEG</button><p>
-    <!--<button id="savePdfReceipt" onclick="pdfBtnClick()">Download PDF</button><p>-->
 
-      
+    <!--<button id="savePdfReceipt" onclick="pdfBtnClick()">Download PDF</button><p>-->
+</div>
+
+
+<div id="receiptPanel" style="display:none">      
     <canvas id="canvas" width="976" height="550"></canvas><p>
     <script> loadImage(); </script>
-    
+
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="editReceipt" onclick="editBtnClick()">Edit Receipt</button><p>
+
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="saveReceipt" onclick="saveBtnClick()">Download JPEG</button><p>
+</div>
+
   </body>
 </html>
