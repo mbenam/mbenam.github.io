@@ -3,7 +3,8 @@ var array = ["Kentrell Ambrose",
               "Ashley Batcher",
               "Lakia Flot",
               "Romaro Mathews",
-              "Latanya Gibson"];
+              "Latanya Gibson",
+"Jamie Hickman"];
 
 //Create and append select list
 var tenantDiv = document.getElementById("tenant");
