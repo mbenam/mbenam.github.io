@@ -3,14 +3,13 @@ from zipfile import ZipFile
 import os
 
 current_dir = os.getcwd()
+zip_file = current_dir + '/azan.zip'
 
 filelist = [ f for f in os.listdir(current_dir) if f != 'unzip_file.py']
 for f in filelist:
     os.remove(os.path.join(current_dir, f))
 
-urllib.request.urlretrieve('http://mbenam.github.io/azn/azan.zip', 'azan.zip')
-
-zip_file = current_dir + '/azan.zip'
+urllib.request.urlretrieve('http://mbenam.github.io/azn/azan.zip', zip_file)
 
 with ZipFile(zip_file, 'r') as zipObj:
    zipObj.extractall()
