@@ -5,11 +5,9 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 
 day_of_year = datetime.now().timetuple().tm_yday
 
-f = open(current_dir + '/TimeTable.txt','rb')
+f = open(current_dir + '/TimeTable.txt','r')
 
-f.seek(day_of_year * 10)
-
-data = f.read(10)
+data = f.read().split('\n')[day_of_year-1].split(',')
 
 f.close()
 
@@ -21,7 +19,7 @@ cron_text = ''
 
 
 for i in range(0,5):
-    cron_text = cron_text + str(data[2*i+1]) + " " + str(data[2*i]) + cron_command
+    cron_text = cron_text + data[2*i+1] + " " + data[2*i] + cron_command
 
 cron_text = cron_text + '00 01 * * * python3 ' + current_dir + '/unzip_file.py' + '\n'
 cron_text = cron_text + '30 01 * * * python3 ' + current_dir + '/new_main.py' + '\n'
