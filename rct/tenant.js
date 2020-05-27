@@ -4,6 +4,7 @@ var array = ["Kentrell Ambrose",
               "Lakia Flot",
               "Romaro Mathews",
               "Latanya Gibson",
+"Brandon Harris",
 "Jamie Hickman"];
 
 //Create and append select list
