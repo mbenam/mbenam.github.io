@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+
+        function handle(e){
+            var key=e.keyCode || e.which;
+            if (key==13){
+                document.getElementById("getChart").click();
+            }
+        }
+        function myFunction(){
+            var url = "https://stockcharts.com/c-sc/sc?s=SPY&p=D&b=5&g=0&i=t2297029702c&r=1596808089508";
+            ticker = document.getElementById("ticker").value;
+            url = url.replace("SPY", ticker);
+            document.getElementById("chart").src = url;
+
+        }
+
+    </script>
+</head>
+<body>
+    <input id="ticker" type="text" onkeypress="handle(event)">
+    <button id="getChart" onclick="myFunction()">Get Chart</button><p></p>
+    <img id="chart">
+</body>
+</html>
