@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tabulator-tables@4.9.3/dist/css/tabulator.min.css" rel="stylesheet">  
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.min.js"></script>
+    <title>BarChart 5-day Losers</title>
+</head>
+
+<style>
+    img {
+      max-width:100%;
+      width:auto;
+    }
+    body {
+        font-family: 'Roboto Mono', monospace;
+        font-size: 12px;
+    }
+    button {
+        font-family: 'Roboto Mono', monospace;
+        font-size: 12px;
+    }
+
+</style>
+
+<script>
+    var chartXMLId = '';
+    var dataJson = {};
+    async function getHtml(){
+        var geturl = 'https://bbl6wt5xpg.execute-api.us-east-1.amazonaws.com/stkChrt/';
+        var response = await fetch(geturl);
+        chartXMLId = await response.text();
+        chartXMLId = chartXMLId.slice(1,-1);
+        response = await fetch('https://6tqlhpq8l6.execute-api.us-east-1.amazonaws.com/bc/5ddwn');
+        dataJson = await response.json();
+        drawTable(dataJson);
+
+    }
+
+
+    function drawTable(tableData){
+        var table = new Tabulator("#example-table", {
+            height:"311px",
+            data: tableData,
+            columns:[
+                {title:"Ticker", field:"symbol"},
+                {title:"Price", field:"lastPrice", sorter:"number"},
+                {title:"Volume", field:"volume"},
+            ],
+            rowClick:function(e, row){
+                var s = document.getElementById("chartArea");
+                var ticker = row.getData().symbol;
+                var temp = `<img src="https://stockcharts.com/c-sc/sc?s=${ticker}&amp;p=D&amp;b=5&amp;g=0&amp;i=${chartXMLId}"></img>`;
+                s.innerHTML = temp;
+            }
+        });
+
+    }
+</script>
+<body onload="getHtml();">
+    <div id="example-table"></div>
+    <div id="chartArea"></div>
+</body>
+</html>
