@@ -1,4 +1,4 @@
-var year = "2021";
+var year = "2022";
 var array = ["January",
               "February",
               "March",
