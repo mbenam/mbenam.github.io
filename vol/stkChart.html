@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+    <title>Daily  Charts</title>
+</head>
+<script>
+    var chartID = "";
+    var tickerIndex = 0;
+    var stocks = [];
+    var numStocks = 0;
+    var mode = "D";
+
+    async function getChartID(){
+        var url = "https://bbl6wt5xpg.execute-api.us-east-1.amazonaws.com/stkChrt/";
+        const response = await fetch(url);
+        return response.text();
+    }
+
+    function weeklyClick(){
+        var s = document.getElementById("btnWeekly");
+        if(s.innerHTML === "Weekly"){
+            s.innerHTML = "Daily";
+            mode = "D";
+            url = `https://stockcharts.com/c-sc/sc?s=${stocks[tickerIndex]}&p=${mode}&b=5&g=0&i=` + chartID;
+            document.getElementById("chartImg").src = url;
+
+        } else {
+            s.innerHTML = "Weekly";
+            mode = "W"
+            url = `https://stockcharts.com/c-sc/sc?s=${stocks[tickerIndex]}&p=${mode}&b=5&g=0&i=` + chartID;
+            document.getElementById("chartImg").src = url;
+
+        }
+    }
+
+    async function initHtml(){
+        const tickers = await getTickers();
+        stocks = tickers.split("\n");
+        stocks = stocks.filter(e => e);
+        stocks.sort(() => Math.random() - 0.5);
+        numStocks = stocks.length;
+        chartID = await getChartID();
+        chartID = chartID.slice(1, -1);
+        url = `https://stockcharts.com/c-sc/sc?s=${stocks[tickerIndex]}&p=${mode}&b=5&g=0&i=` + chartID;
+        document.getElementById("chartImg").src = url;
+    }
+
+    function btnNext(){
+        if (tickerIndex != (numStocks - 1)){
+            tickerIndex = tickerIndex + 1;
+            url = `https://stockcharts.com/c-sc/sc?s=${stocks[tickerIndex]}&p=${mode}&b=5&g=0&i=` + chartID;
+            document.getElementById("chartImg").src = url;
+            //document.getElementById("btnWeekly").innerHTML = "Weekly";
+        }
+    }
+
+    function btnPrev(){
+        if(tickerIndex != 0){
+            tickerIndex = tickerIndex - 1;
+            url = `https://stockcharts.com/c-sc/sc?s=${stocks[tickerIndex]}&p=${mode}&b=5&g=0&i=` + chartID;
+            document.getElementById("chartImg").src = url;            
+            //document.getElementById("btnWeekly").innerHTML = "Weekly";
+        }
+    }
+
+    async function getTickers(){
+        const response = await fetch("https://mbenam.github.io/vol/tickers.txt");
+        return response.text();
+    }
+
+</script>
+<body onload="initHtml();">
+    <div class="flex one demo" id="imgBox">
+        <img id="chartImg" src="" alt="">
+    </div>
+    <div class="flex three demo">
+        <div><button style="margin: 15px" onclick="btnPrev();">Prev</button></div>
+        <div><button class='error'  id="btnWeekly" style="float: center; margin: 15px" onClick="weeklyClick();">Weekly</button></div>
+        <div><button class='success' style="float: right; margin: 15px" onclick="btnNext();">Next</button></div>
+    </div>
+</body>
+</html>
