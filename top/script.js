@@ -106,6 +106,14 @@ function dateCopy() {
 
 }
 
+function codeCopy() {
+  let copyText = document.getElementById("orderText");
+  copyText.select();
+  document.execCommand("copy");
+
+}
+
+
 function parseOrder(){
   const order = document.getElementById("orderText").value;
   const returnList = parseTOSOrder(order);
