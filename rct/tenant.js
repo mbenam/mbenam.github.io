@@ -1,4 +1,4 @@
-var array = ["Kentrell Ambrose",
+var array = ["Kenneth Gibson",
               "Darius Lanehart",
               "Ashley Batcher",
               "Brandon Harris",
