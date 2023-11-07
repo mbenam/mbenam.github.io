@@ -1,10 +1,5 @@
 var array = ["Kenneth Gibson",
-              "Darius Lanehart",
-              "Ashley Batcher",
-              "Brandon Harris",
-              "Romaro Mathews",
-              "Latanya Gibson",
-             "Jared Hill",
+             "Robin Miles",
              "Wilmer & Sofia",
 "Jamie Hickman"];
 
