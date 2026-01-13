@@ -6,7 +6,7 @@ var array = ["4758TL1",
               "8426BFB",
               "8426BFC",
               "8426BFD",
-"8291A", "8291B", "8291D", "8165-3"];
+"8291A", "8291B", "8291D", "8165-4"];
 
 //Create and append select list
 var unitDiv = document.getElementById("unit");
