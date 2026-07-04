@@ -65,7 +65,7 @@
         --checker: url('data:image/svg+xml;utf8,<svg width="10" height="10" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%231a1a1a"/><rect x="5" y="5" width="5" height="5" fill="%231a1a1a"/><rect x="5" width="5" height="5" fill="%230a0a0a"/><rect y="5" width="5" height="5" fill="%230a0a0a"/></svg>');
     }
 
-    [data-theme="retro"] {
+    [data-theme="sepia"] {
         --bg0: #e3d5c8;
         --bg1: rgba(239, 230, 220, 0.92);
         --bg2: #f2ebe4;
@@ -81,6 +81,63 @@
         --shadow-ring: rgba(0, 0, 0, 0.08);
         --bg-dots: rgba(0,0,0,0.05);
         --checker: url('data:image/svg+xml;utf8,<svg width="10" height="10" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%23d6c6b3"/><rect x="5" y="5" width="5" height="5" fill="%23d6c6b3"/><rect x="5" width="5" height="5" fill="%23f2ebe4"/><rect y="5" width="5" height="5" fill="%23f2ebe4"/></svg>');
+    }
+
+    /* Amber CRT terminal: near-black with warm phosphor amber */
+    [data-theme="retro"] {
+        --bg0: #0a0700;
+        --bg1: rgba(20, 14, 2, 0.92);
+        --bg2: #1a1204;
+        --bg3: #2a2008;
+        --line: #4a3810;
+        --text: #ffb000;
+        --muted: #a06a0a;
+        --accent: #ffcf40;
+        --accent-dim: rgba(255, 176, 0, 0.16);
+        --accent-text: #0a0700;
+        --danger: #ff5a2a;
+        --shadow-color: rgba(0,0,0,0.85);
+        --shadow-ring: rgba(255,176,0,0.18);
+        --bg-dots: rgba(255,176,0,0.06);
+        --checker: url('data:image/svg+xml;utf8,<svg width="10" height="10" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%232a2008"/><rect x="5" y="5" width="5" height="5" fill="%232a2008"/><rect x="5" width="5" height="5" fill="%231a1204"/><rect y="5" width="5" height="5" fill="%231a1204"/></svg>');
+    }
+
+    /* Nord: cool muted slate-blue */
+    [data-theme="nord"] {
+        --bg0: #242933;
+        --bg1: rgba(46, 52, 64, 0.92);
+        --bg2: #2e3440;
+        --bg3: #3b4252;
+        --line: #434c5e;
+        --text: #eceff4;
+        --muted: #7b88a1;
+        --accent: #88c0d0;
+        --accent-dim: rgba(136, 192, 208, 0.16);
+        --accent-text: #2e3440;
+        --danger: #bf616a;
+        --shadow-color: rgba(0,0,0,0.6);
+        --shadow-ring: rgba(255,255,255,0.1);
+        --bg-dots: rgba(255,255,255,0.04);
+        --checker: url('data:image/svg+xml;utf8,<svg width="10" height="10" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%233b4252"/><rect x="5" y="5" width="5" height="5" fill="%233b4252"/><rect x="5" width="5" height="5" fill="%232e3440"/><rect y="5" width="5" height="5" fill="%232e3440"/></svg>');
+    }
+
+    /* High contrast: pure black/white chrome, one vivid accent */
+    [data-theme="contrast"] {
+        --bg0: #000000;
+        --bg1: rgba(0, 0, 0, 0.96);
+        --bg2: #0a0a0a;
+        --bg3: #1a1a1a;
+        --line: #ffffff;
+        --text: #ffffff;
+        --muted: #cccccc;
+        --accent: #ffe600;
+        --accent-dim: rgba(255, 230, 0, 0.22);
+        --accent-text: #000000;
+        --danger: #ff2d2d;
+        --shadow-color: rgba(0,0,0,1);
+        --shadow-ring: rgba(255,255,255,0.4);
+        --bg-dots: rgba(255,255,255,0.1);
+        --checker: url('data:image/svg+xml;utf8,<svg width="10" height="10" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="%23333333"/><rect x="5" y="5" width="5" height="5" fill="%23333333"/><rect x="5" width="5" height="5" fill="%23111111"/><rect y="5" width="5" height="5" fill="%23111111"/></svg>');
     }
 
     * { -webkit-tap-highlight-color: transparent; }
@@ -127,6 +184,33 @@
         transform-origin: 0 0; pointer-events: none; display: none;
     }
     #reference-layer img { display: block; image-rendering: auto; }
+
+    /* Crop overlay lives inside #canvas-wrapper so it shares the canvas transform.
+       Coordinates are in canvas pixels; sizes are scaled down by the wrapper. */
+    #crop-overlay { position: absolute; top: 0; left: 0; display: none; pointer-events: none; }
+    #crop-overlay.show { display: block; }
+    #crop-box {
+        position: absolute; box-sizing: border-box;
+        border: 1px solid #ff9500;
+        box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
+        pointer-events: auto; touch-action: none;
+    }
+    .crop-handle {
+        position: absolute; pointer-events: auto;
+        width: 14px; height: 14px; margin: -7px 0 0 -7px;
+        background: #ff9500; border: 1.5px solid #fff; border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        transform-origin: center; touch-action: none;
+    }
+    /* Handles are sized in screen px via counter-scale set inline at runtime. */
+    .crop-handle.c-nw { left: 0;   top: 0; }
+    .crop-handle.c-n  { left: 50%; top: 0; }
+    .crop-handle.c-ne { left: 100%;top: 0; }
+    .crop-handle.c-e  { left: 100%;top: 50%; }
+    .crop-handle.c-se { left: 100%;top: 100%; }
+    .crop-handle.c-s  { left: 50%; top: 100%; }
+    .crop-handle.c-sw { left: 0;   top: 100%; }
+    .crop-handle.c-w  { left: 0;   top: 50%; }
 
     /* ---------- Top Bar ---------- */
     #ui-top {
@@ -187,6 +271,38 @@
     .pill.active { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
     .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.4; }
     .pill.active .dot { opacity: 1; }
+    .pill.mini { padding: 4px 10px; font-size: 11px; }
+    .pill.mini[disabled] { opacity: 0.55; }
+
+    .colors-list { max-height: 46vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .color-row { display: flex; align-items: center; gap: 10px; padding: 5px 4px; }
+    .color-chip { width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; box-shadow: inset 0 0 0 1px var(--shadow-ring); }
+    .color-hex { font-family: var(--mono); font-size: 13px; color: var(--text); text-transform: uppercase; }
+    .color-pct { font-size: 12px; color: var(--muted); margin-left: auto; min-width: 44px; text-align: right; }
+
+    .ramp-field { display: flex; flex-direction: column; gap: 4px; margin: 3px 0; }
+    .ramp-field-row { flex-direction: row; align-items: center; justify-content: space-between; margin: 1px 0; }
+    .ramp-field label { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+    .ramp-num { color: var(--text); font-family: var(--mono); font-size: 12px; }
+    .ramp-field input[type="color"] { width: 100%; height: 32px; border-radius: var(--r-md); }
+    .ramp-field input[type="range"] { margin: 0; }
+    .ramp-toggle { display: flex; gap: 6px; }
+    .ramp-tog-btn {
+        flex: 1; padding: 7px; border-radius: var(--r-md); font-size: 13px; font-weight: 600;
+        background: var(--bg3); color: var(--muted); border: 1px solid var(--line);
+    }
+    .ramp-tog-btn.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+    .ramp-field-row .ramp-tog-btn { flex: 0 0 auto; min-width: 62px; padding: 6px 14px; }
+    .ramp-preview { display: flex; gap: 3px; height: 40px; margin-top: 4px; }
+    .ramp-preview .ramp-swatch {
+        flex: 1; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--shadow-ring);
+        display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3px;
+    }
+    .ramp-preview .ramp-swatch.base { box-shadow: inset 0 0 0 2px var(--accent); }
+    /* Ramp modal is control-dense: tighter padding + internal scroll as a safety net. */
+    #ramp-modal .modal-content { padding: 18px 20px; gap: 6px; overflow-y: auto; }
+    #ramp-modal .modal-sub { margin-bottom: 2px; }
+    #ramp-modal .modal-divider { margin: 6px 0 2px; }
 
     /* ---------- Floating fit button ---------- */
     #fit-btn {
@@ -298,6 +414,24 @@
     }
     #ref-edit-banner.show { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
 
+    #ref-crop-banner {
+        position: absolute; top: calc(16px + env(safe-area-inset-top, 0px));
+        left: 50%; transform: translate(-50%, -10px);
+        background: var(--bg2); border: 1px solid var(--line); z-index: 200;
+        padding: 8px 10px; border-radius: 999px;
+        display: flex; align-items: center; gap: 8px;
+        box-shadow: 0 12px 30px var(--shadow-color);
+        opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    #ref-crop-banner.show { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+    #ref-crop-banner .crop-label { font-size: 13px; font-weight: 600; color: var(--text); padding: 0 4px; }
+    #ref-crop-banner button {
+        padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; border: none;
+    }
+    #ref-crop-banner .crop-apply { background: var(--accent); color: var(--accent-text); }
+    #ref-crop-banner .crop-apply:disabled { opacity: 0.4; }
+    #ref-crop-banner .crop-cancel { background: var(--bg3); color: var(--text); }
+
     /* ---------- Range Inputs ---------- */
     input[type="range"] {
         -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
@@ -323,7 +457,7 @@
     .modal-content {
         background: var(--bg2); padding: 24px; border-radius: var(--r-lg); border: 1px solid var(--line);
         display: flex; flex-direction: column; gap: 12px; width: 85%; max-width: 340px;
-        max-height: 85%; box-sizing: border-box; box-shadow: 0 24px 80px var(--shadow-color);
+        max-height: 88%; overflow-y: auto; box-sizing: border-box; box-shadow: 0 24px 80px var(--shadow-color);
         transform: translateY(8px) scale(0.98); transition: transform 0.2s ease;
     }
     .modal-overlay.open .modal-content { transform: none; }
@@ -352,6 +486,30 @@
     .modal-divider { border-top: 1px solid var(--line); margin: 4px 0; }
     .btn-row { display: flex; gap: 10px; }
     .btn-row button { flex: 1; }
+
+    /* ---------- Custom Dropdown ---------- */
+    .dropdown-container { position: relative; width: 100%; z-index: 10; }
+    .dropdown-header {
+        width: 100%; padding: 11px 13px; border-radius: var(--r-md);
+        border: 1px solid var(--line); background: var(--bg0); color: var(--text);
+        display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+        box-sizing: border-box; font-size: 14px; font-family: inherit; font-weight: 600;
+    }
+    .dropdown-menu {
+        position: absolute; bottom: 100%; left: 0; width: 100%;
+        background: var(--bg2); border: 1px solid var(--line); border-radius: var(--r-md);
+        margin-bottom: 6px; max-height: 220px; overflow-y: auto; scrollbar-width: none;
+        display: none; flex-direction: column; padding: 6px; box-shadow: 0 10px 40px var(--shadow-color);
+    }
+    .dropdown-menu.show { display: flex; }
+    .dropdown-item {
+        padding: 8px 10px; border-radius: var(--r-sm); cursor: pointer;
+        display: flex; flex-direction: column; gap: 6px;
+    }
+    .dropdown-item:active { background: var(--bg3); }
+    .dropdown-item-title { font-size: 12px; font-weight: 600; text-align: left; }
+    .dropdown-swatches { display: flex; flex-wrap: wrap; gap: 3px; }
+    .dropdown-swatch { width: 14px; height: 14px; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15); }
 
     /* ---------- Projects ---------- */
     #project-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; min-height: 60px; }
@@ -406,17 +564,22 @@
     <symbol id="ic-move" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><path d="m9 5 3-3 3 3M9 19l3 3 3-3M5 9 2 12l3 3M19 9l3 3-3 3"/></symbol>
     
     <symbol id="ic-outline" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/><rect x="7" y="7" width="10" height="10" rx="1" fill="currentColor"/></symbol>
+    <symbol id="ic-flip-h" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7 3 12l5 5V7Z" fill="currentColor"/><path d="M16 7v10" stroke-dasharray="2 2"/><path d="M20 7v10" stroke-dasharray="2 2"/></symbol>
+    <symbol id="ic-flip-v" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M7 8l5-5 5 5H7Z" fill="currentColor"/><path d="M7 16h10" stroke-dasharray="2 2"/><path d="M7 20h10" stroke-dasharray="2 2"/></symbol>
+    <symbol id="ic-rotate" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v5h-5"/></symbol>
     <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
     <symbol id="ic-paste" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></symbol>
     <symbol id="ic-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
     <symbol id="ic-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
     <symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="ic-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
     <symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="ic-eye-off" viewBox="0 0 24 24"><path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c6.5 0 10 7 10 7a17 17 0 0 1-2 3.2M6.6 6.6C3.7 8.5 2 12 2 12s3.5 7 10 7c1.8 0 3.4-.5 4.7-1.3"/><path d="m2 2 20 20"/></symbol>
     <symbol id="ic-merge" viewBox="0 0 24 24"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M4 19h16"/></symbol>
     <symbol id="ic-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></symbol>
     <symbol id="ic-palette" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="9.5" r="0.5" fill="currentColor"/><circle cx="13" cy="7.5" r="0.5" fill="currentColor"/><circle cx="16.5" cy="11" r="0.5" fill="currentColor"/><path d="M21 12a9 9 0 0 0-9-9 9 9 0 0 0 0 18c1.2 0 2-.8 2-2 0-.6-.3-1-.6-1.4-.3-.4-.4-.7-.4-1.1 0-1.1.9-2 2-2h2a4 4 0 0 0 4-2.5Z"/></symbol>
     <symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13.5 13.5 0 0 1 0 18 13.5 13.5 0 0 1 0-18Z"/></symbol>
+    <symbol id="ic-ramp" viewBox="0 0 24 24"><rect x="3" y="6" width="4" height="12" rx="1" fill="currentColor" stroke="none"/><rect x="8" y="6" width="4" height="12" rx="1" fill="currentColor" opacity="0.66" stroke="none"/><rect x="13" y="6" width="4" height="12" rx="1" fill="currentColor" opacity="0.42" stroke="none"/><rect x="18" y="6" width="3" height="12" rx="1" fill="currentColor" opacity="0.22" stroke="none"/></symbol>
     <symbol id="ic-fit" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
     <symbol id="ic-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
     <symbol id="ic-settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
@@ -455,11 +618,16 @@
 
     <div class="bar-row scroll-row" id="mod-row">
         <button class="pill" id="pill-size" onclick="toggleSize()"><span class="dot"></span>Size: <span id="size-val">1px</span></button>
+        <button class="pill" id="pill-brush" onclick="toggleBrushShape()"><span class="dot"></span>Brush: <span id="brush-val">Square</span></button>
         <button class="pill" id="pill-shape" style="display:none;" onclick="toggleShape()"><span class="dot"></span>Mode: <span id="shape-val">Outline</span></button>
         <button class="pill" id="pill-shade" style="display:none;" onclick="toggleShadeMode()"><span class="dot"></span>Mode: <span id="shade-val">Lighten</span></button>
-        <button class="pill" id="pill-mx" onclick="mirrorX = !mirrorX; this.classList.toggle('active', mirrorX)"><span class="dot"></span>X-Mirror</button>
-        <button class="pill" id="pill-my" onclick="mirrorY = !mirrorY; this.classList.toggle('active', mirrorY)"><span class="dot"></span>Y-Mirror</button>
-        <button class="pill active" id="pill-pen" onclick="penOnly = !penOnly; this.classList.toggle('active', penOnly)"><span class="dot"></span>Pen only</button>
+        <button class="pill" id="pill-sym" onclick="cycleSymmetry()"><span class="dot"></span>Symmetry: <span id="sym-val">Off</span></button>
+        <button class="pill active" id="pill-lock" onclick="togglePaletteLock()"><span class="dot"></span>Palette lock</button>
+        <button class="pill" id="pill-pen" onclick="penOnly = !penOnly; this.classList.toggle('active', penOnly)"><span class="dot"></span>Pen only</button>
+        <button class="pill" onclick="flipSel('h')"><svg class="i" style="width:14px;height:14px"><use href="#ic-flip-h"/></svg>Flip H</button>
+        <button class="pill" onclick="flipSel('v')"><svg class="i" style="width:14px;height:14px"><use href="#ic-flip-v"/></svg>Flip V</button>
+        <button class="pill" onclick="rotateSel()"><svg class="i" style="width:14px;height:14px"><use href="#ic-rotate"/></svg>Rotate</button>
+        <button class="pill" onclick="showColors()"><svg class="i" style="width:14px;height:14px"><use href="#ic-palette"/></svg>Colors</button>
         <button class="pill" onclick="applyOutline()"><svg class="i" style="width:14px;height:14px"><use href="#ic-outline"/></svg>Outline</button>
         <button class="pill" onclick="copy()"><svg class="i" style="width:14px;height:14px"><use href="#ic-copy"/></svg>Copy</button>
         <button class="pill" onclick="paste()"><svg class="i" style="width:14px;height:14px"><use href="#ic-paste"/></svg>Paste</button>
@@ -473,6 +641,18 @@
         <canvas id="draft"></canvas>
         <div id="reference-layer"></div>
         <canvas id="ui-layer"></canvas>
+        <div id="crop-overlay">
+            <div id="crop-box">
+                <div class="crop-handle c-nw" data-h="nw"></div>
+                <div class="crop-handle c-n"  data-h="n"></div>
+                <div class="crop-handle c-ne" data-h="ne"></div>
+                <div class="crop-handle c-e"  data-h="e"></div>
+                <div class="crop-handle c-se" data-h="se"></div>
+                <div class="crop-handle c-s"  data-h="s"></div>
+                <div class="crop-handle c-sw" data-h="sw"></div>
+                <div class="crop-handle c-w"  data-h="w"></div>
+            </div>
+        </div>
     </div>
     <canvas id="grid-overlay"></canvas>
 </div>
@@ -481,6 +661,12 @@
 <div id="ref-edit-banner" onclick="toggleRefMove()">
     <svg class="i"><use href="#ic-move"/></svg>
     Positioning Reference (Tap to Lock)
+</div>
+
+<div id="ref-crop-banner">
+    <span class="crop-label">Crop reference</span>
+    <button class="crop-cancel" onclick="exitCropMode(false)">Cancel</button>
+    <button id="ref-crop-apply" class="crop-apply" onclick="applyCrop()" disabled>Apply</button>
 </div>
 
 <!-- Zoom to fit -->
@@ -550,8 +736,11 @@
         <div class="size-grid">
             <button class="theme-btn" data-theme="dark" onclick="setAppTheme('dark')">Dark</button>
             <button class="theme-btn" data-theme="light" onclick="setAppTheme('light')">Light</button>
+            <button class="theme-btn" data-theme="sepia" onclick="setAppTheme('sepia')">Sepia</button>
             <button class="theme-btn" data-theme="oled" onclick="setAppTheme('oled')">OLED</button>
-            <button class="theme-btn" data-theme="retro" onclick="setAppTheme('retro')">Retro</button>
+            <button class="theme-btn" data-theme="retro" onclick="setAppTheme('retro')">Amber CRT</button>
+            <button class="theme-btn" data-theme="nord" onclick="setAppTheme('nord')">Nord</button>
+            <button class="theme-btn" data-theme="contrast" onclick="setAppTheme('contrast')">Contrast</button>
         </div>
 
         <div class="modal-divider" style="margin-top:12px;"></div>
@@ -559,6 +748,17 @@
     </div>
 </div>
 
+<!-- Color Count Modal -->
+<div id="colors-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>Colors Used</h3>
+        <p class="modal-sub" id="colors-count">0 colors used</p>
+        <div class="modal-divider"></div>
+        <div id="colors-list" class="colors-list"></div>
+        <div class="modal-divider" style="margin-top:12px;"></div>
+        <button class="btn-cancel" onclick="closeColorsModal()">Close</button>
+    </div>
+</div>
 <!-- Reference Image Modal -->
 <div id="ref-modal" class="modal-overlay">
     <div class="modal-content">
@@ -590,7 +790,12 @@
             <button id="ref-reset-btn" class="btn-cancel" onclick="resetRef('original')">1:1 Size</button>
             <button id="ref-fit-btn" class="btn-cancel" onclick="resetRef('fit')">Fit Canvas</button>
         </div>
-        
+
+        <div class="btn-row">
+            <button id="ref-crop-btn" class="btn-cancel" onclick="enterCropMode()">Crop</button>
+            <button id="ref-restore-btn" class="btn-cancel" onclick="restoreRefOriginal()">Restore Original</button>
+        </div>
+
         <div class="btn-row">
             <button id="ref-clear-btn" class="btn-cancel" onclick="clearRef()">Remove Ref</button>
             <button class="btn-cancel" onclick="closeRefModal()">Close</button>
@@ -649,9 +854,24 @@
             <button class="ghost-btn" onclick="removeColorFromPalette()"><svg class="i"><use href="#ic-trash"/></svg> Remove Color</button>
         </div>
 
+        <button class="ghost-btn" style="width:100%; justify-content:center; border:1px solid var(--line); border-radius: var(--r-md);" onclick="openRampModal()"><svg class="i" style="width:16px;height:16px"><use href="#ic-ramp"/></svg> Generate ramp (hue shift)</button>
+
         <div class="modal-divider"></div>
-        <input type="text" id="lospec-id" class="lospec-input" placeholder="Lospec ID (e.g. pico-8)">
-        <button onclick="fetchLospec()"><svg class="i"><use href="#ic-globe"/></svg>Load from Lospec</button>
+        
+        <div class="dropdown-container">
+            <button class="dropdown-header" onclick="togglePresetMenu(event)">
+                <span>Built-in Presets...</span>
+                <svg class="i" style="width:16px;height:16px"><use href="#ic-chevron-up"/></svg>
+            </button>
+            <div class="dropdown-menu" id="preset-menu">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <input type="text" id="lospec-id" class="lospec-input" placeholder="Lospec ID (e.g. pico-8)">
+            <button onclick="fetchLospec()" class="ghost-btn" style="padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-md);"><svg class="i"><use href="#ic-globe"/></svg></button>
+        </div>
 
         <div class="btn-row" style="margin-top: 8px;">
             <button class="btn-cancel" onclick="closePaletteModal()">Cancel</button>
@@ -660,11 +880,60 @@
     </div>
 </div>
 
+<!-- Ramp Generator Modal (hue-shift) -->
+<div id="ramp-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>Generate ramp</h3>
+        <p class="modal-sub">Hue-shifted shadows &amp; highlights from a base</p>
+
+        <div class="ramp-field">
+            <label>Base color</label>
+            <input type="color" id="ramp-base" value="#b13e53" oninput="renderRamp()">
+        </div>
+
+        <div class="ramp-field">
+            <label>Length <span id="ramp-len-val" class="ramp-num">5</span></label>
+            <input type="range" id="ramp-len" min="3" max="9" step="1" value="5" oninput="renderRamp()">
+        </div>
+
+        <div class="ramp-field">
+            <label>Shift style</label>
+            <div class="ramp-toggle">
+                <button id="ramp-style-warm" class="ramp-tog-btn active" onclick="setRampStyle('warm')">Warm / Cool</button>
+                <button id="ramp-style-rotate" class="ramp-tog-btn" onclick="setRampStyle('rotate')">Rotate</button>
+            </div>
+        </div>
+
+        <div class="ramp-field">
+            <label>Hue shift <span id="ramp-hue-val" class="ramp-num">20°</span></label>
+            <input type="range" id="ramp-hue" min="0" max="45" step="1" value="20" oninput="renderRamp()">
+        </div>
+
+        <div class="ramp-field">
+            <label>Luminance spread <span id="ramp-lum-val" class="ramp-num">Medium</span></label>
+            <input type="range" id="ramp-lum" min="10" max="45" step="1" value="28" oninput="renderRamp()">
+        </div>
+
+        <div class="ramp-field ramp-field-row">
+            <label>Saturation arc</label>
+            <button id="ramp-satarc" class="ramp-tog-btn active" onclick="toggleSatArc()">On</button>
+        </div>
+
+        <label style="font-size:12px; color:var(--muted); margin-top:2px;">Preview</label>
+        <div id="ramp-preview" class="ramp-preview"></div>
+
+        <div class="btn-row" style="margin-top: 8px;">
+            <button class="btn-cancel" onclick="closeRampModal()">Cancel</button>
+            <button class="primary-btn" onclick="addRampToPalette()">Add to palette</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // Theme Management Engine
     function setAppTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        const isLight = (theme === 'light' || theme === 'retro');
+        const isLight = (theme === 'light' || theme === 'sepia');
         document.querySelector('meta[name="color-scheme"]').setAttribute('content', isLight ? 'light' : 'dark');
         localStorage.setItem('pixel-editor-theme-v1', theme);
         
@@ -677,8 +946,12 @@
     // Core State Variables
     let W = 160, H = 144;
     let currentTool = 'pen';
-    let mirrorX = false, mirrorY = false, penOnly = true;
+    let symmetry = 'off'; // off | x | y | xy | quad
+    let mirrorX = false, mirrorY = false; // derived from symmetry, kept for draw math
+    let penOnly = false;
     let brushSize = 1;
+    let brushShape = 'square'; // square | round
+    let paletteLock = true;
     let shapeMode = 'outline';
     let shadeMode = 'lighten';
 
@@ -694,6 +967,25 @@
     let tempPalette = []; 
     let activeColorIndex = 0;
 
+    const PALETTE_PRESETS = {
+        "1-Bit (B&W)": ["#000000", "#ffffff"],
+        "1-Bit Ivory": ["#1a1c2c", "#f4f4f4"],
+        "Game Boy (4)": ["#0f380f", "#306230", "#8bac0f", "#9bbc0f"],
+        "Game Boy Pocket": ["#181818", "#4a4a4a", "#8c8c8c", "#c6c6c6"],
+        "CGA (4)": ["#000000", "#55ffff", "#ff55ff", "#ffffff"],
+        "Kirokaze GB (4)": ["#332c50", "#46878f", "#94e344", "#e2f3e4"],
+        "Ice Cream GB (4)": ["#7c3f58", "#eb6b6f", "#f9a875", "#fff6d3"],
+        "Teletext (8)": ["#000000", "#ff0000", "#00ff00", "#ffff00", "#0000ff", "#ff00ff", "#00ffff", "#ffffff"],
+        "Sweetie 8": ["#1a1c2c", "#5d275d", "#b13e53", "#ef7d57", "#ffcd75", "#a7f070", "#38b764", "#257179"],
+        "Pico-8 (16)": ["#000000", "#1D2B53", "#7E2553", "#008751", "#AB5236", "#5F574F", "#C2C3C7", "#FFF1E8", "#FF004D", "#FFA300", "#FFEC27", "#00E436", "#29ADFF", "#83769C", "#FF77A8", "#FFCCAA"],
+        "Dawnbringer (16)": ["#140C1C", "#442434", "#30346D", "#4E4A4E", "#854C30", "#346524", "#D04648", "#757161", "#597DCE", "#D27D2C", "#8595A1", "#6DAA2C", "#D2AA99", "#6DC2CA", "#DAD45E", "#DEEED6"],
+        "Sweetie 16": ["#1a1c2c", "#5d275d", "#b13e53", "#ef7d57", "#ffcd75", "#a7f070", "#38b764", "#257179", "#29366f", "#3b5dc9", "#41a6f6", "#73eff7", "#f4f4f4", "#94b0c2", "#566c86", "#333c57"],
+        "Endesga 16": ["#e4a672", "#b86f50", "#743f39", "#3f2832", "#9e2835", "#e53b44", "#fb922b", "#ffe762", "#63c64d", "#327345", "#193d3f", "#4f6781", "#afbfd2", "#ffffff", "#2ce8f4", "#0484d1"],
+        "Fantasy 16": ["#1f240a", "#39571c", "#a58c27", "#efac28", "#efd8a1", "#ab5c1c", "#183f39", "#ef692f", "#efb775", "#a56243", "#773421", "#724b3b", "#3b2820", "#180f0f", "#3a5b52", "#7b7243"],
+        "Steam Lords 16": ["#213b25", "#3a604a", "#4f7754", "#a19f7c", "#77744f", "#775c4f", "#603b3a", "#3b2137", "#170e19", "#2f213b", "#433a60", "#4f5277", "#65738c", "#7c94a1", "#a0b9ba", "#c0d1cc"],
+        "Nostalgia 6": ["#d0d058", "#a0a840", "#708028", "#405010", "#284808", "#183010"]
+    };
+
     // Canvas & Layer State
     let layers = [];
     let activeIndex = 0;
@@ -704,8 +996,9 @@
 
     // Reference Image State
     let refImgSrc = null;
-    let refState = { x: 0, y: 0, scale: 1, opacity: 0.5, visible: false, isMoving: false };
+    let refState = { x: 0, y: 0, scale: 1, opacity: 0.5, visible: false, isMoving: false, crop: null };
     let refDrag = null, refPinch = null;
+    let refCropMode = false, refCropRect = null, cropDrag = null; // crop rect in ref-content pixels
 
     // Drawing & Zoom Variables
     let activePointers = new Map();
@@ -737,13 +1030,23 @@
     const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
     window.onload = () => {
-        const savedTheme = localStorage.getItem('pixel-editor-theme-v1') || 'dark';
+        const savedTheme = localStorage.getItem('pixel-editor-theme-v1') || 'sepia';
         setAppTheme(savedTheme);
 
         workspace.addEventListener('contextmenu', e => e.preventDefault());
         window.addEventListener('resize', () => { zoomToFit(); });
+        
+        // Close dropdown when clicking outside
+        window.addEventListener('pointerdown', (e) => {
+            if (!e.target.closest('.dropdown-container')) {
+                const menu = document.getElementById('preset-menu');
+                if (menu) menu.classList.remove('show');
+            }
+        });
 
+        renderPresetMenu();
         refreshPaletteUI();
+        initCropListeners();
         if (!tryRestoreSession()) {
             initCanvas(160, 144, true);
             openProjectModal();
@@ -833,6 +1136,29 @@
         document.getElementById('pill-shade').classList.toggle('active', shadeMode === 'darken');
     }
 
+    function toggleBrushShape() {
+        brushShape = brushShape === 'square' ? 'round' : 'square';
+        document.getElementById('brush-val').textContent = brushShape === 'square' ? 'Square' : 'Round';
+        document.getElementById('pill-brush').classList.toggle('active', brushShape === 'round');
+    }
+
+    function togglePaletteLock() {
+        paletteLock = !paletteLock;
+        document.getElementById('pill-lock').classList.toggle('active', paletteLock);
+        toast(paletteLock ? 'Palette lock on — colors snap to palette' : 'Palette lock off');
+    }
+
+    // Symmetry cycles off → X → Y → XY → Quad. mirrorX/mirrorY drive the draw math.
+    const SYM_ORDER = ['off', 'x', 'y', 'xy', 'quad'];
+    const SYM_LABEL = { off: 'Off', x: 'Vertical', y: 'Horizontal', xy: 'Both', quad: '4-Way' };
+    function cycleSymmetry() {
+        symmetry = SYM_ORDER[(SYM_ORDER.indexOf(symmetry) + 1) % SYM_ORDER.length];
+        mirrorX = (symmetry === 'x' || symmetry === 'xy' || symmetry === 'quad');
+        mirrorY = (symmetry === 'y' || symmetry === 'xy' || symmetry === 'quad');
+        document.getElementById('sym-val').textContent = SYM_LABEL[symmetry];
+        document.getElementById('pill-sym').classList.toggle('active', symmetry !== 'off');
+    }
+
     // --- Outline Tool --- //
     
     function applyOutline() {
@@ -844,35 +1170,55 @@
         let data = imgData.data;
         let w = imgData.width, h = imgData.height;
 
-        let outlinePixels = [];
         let rgb = hexToRgb(getCol());
+        const thickness = Math.max(1, brushSize);
 
-        const getA = (x, y) => (x < 0 || x >= w || y < 0 || y >= h) ? 0 : data[(y * w + x) * 4 + 3];
+        // Snapshot the original opaque mask (outline grows outward from these).
+        const solid = new Uint8Array(w * h);
+        let anySolid = false;
+        for (let i = 0; i < w * h; i++) {
+            if (data[i * 4 + 3] > 0) { solid[i] = 1; anySolid = true; }
+        }
+        if (!anySolid) return toast("No opaque pixels to outline here");
 
-        for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-                let p = (y * w + x) * 4;
-                if (data[p + 3] === 0) { 
-                    if (getA(x - 1, y) > 0 || getA(x + 1, y) > 0 || getA(x, y - 1) > 0 || getA(x, y + 1) > 0) {
-                        outlinePixels.push(p);
+        // Dilate the mask `thickness` times. Each ring is any empty cell 4-adjacent
+        // to the current mask; only originally-empty cells get painted.
+        let mask = solid.slice();
+        const round = brushShape === 'round';
+        for (let step = 0; step < thickness; step++) {
+            let next = mask.slice();
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    let idx = y * w + x;
+                    if (mask[idx]) continue;
+                    let n = (x > 0 && mask[idx - 1]) || (x < w - 1 && mask[idx + 1]) ||
+                            (y > 0 && mask[idx - w]) || (y < h - 1 && mask[idx + w]);
+                    // A round outline also fills diagonals except on the final ring,
+                    // which keeps corners slightly clipped for a smoother edge.
+                    if (!n && round && step < thickness - 1) {
+                        n = (x > 0 && y > 0 && mask[idx - w - 1]) || (x < w - 1 && y > 0 && mask[idx - w + 1]) ||
+                            (x > 0 && y < h - 1 && mask[idx + w - 1]) || (x < w - 1 && y < h - 1 && mask[idx + w + 1]);
                     }
+                    if (n) next[idx] = 1;
                 }
             }
+            mask = next;
         }
 
-        if (outlinePixels.length === 0) return toast("No opaque pixels to outline here");
-
-        for (let i = 0; i < outlinePixels.length; i++) {
-            let p = outlinePixels[i];
-            data[p] = rgb[0]; 
-            data[p + 1] = rgb[1]; 
-            data[p + 2] = rgb[2]; 
-            data[p + 3] = 255;
+        // Paint every cell that's in the dilated mask but wasn't originally solid.
+        let painted = 0;
+        for (let i = 0; i < w * h; i++) {
+            if (mask[i] && !solid[i]) {
+                let p = i * 4;
+                data[p] = rgb[0]; data[p + 1] = rgb[1]; data[p + 2] = rgb[2]; data[p + 3] = 255;
+                painted++;
+            }
         }
+        if (painted === 0) return toast("No room to outline here");
 
         ctx.putImageData(imgData, b.x0, b.y0);
         saveHistory();
-        toast("Outline applied");
+        toast(`Outline applied (${thickness}px)`);
     }
 
     // --- Reference Image API --- //
@@ -891,6 +1237,8 @@
         document.getElementById('ref-reset-btn').disabled = !hasImg;
         document.getElementById('ref-fit-btn').disabled = !hasImg;
         document.getElementById('ref-clear-btn').disabled = !hasImg;
+        document.getElementById('ref-crop-btn').disabled = !hasImg;
+        document.getElementById('ref-restore-btn').disabled = !hasImg || !refState.crop;
     }
 
     function updateRefOpacity() {
@@ -907,6 +1255,7 @@
 
     function toggleRefMove() {
         if (!refImgSrc) return;
+        if (refCropMode) exitCropMode(false); // leaving crop mode if it was on
         refState.isMoving = !refState.isMoving;
         if (refState.isMoving) refState.visible = true;
         updateRefTransform();
@@ -914,24 +1263,182 @@
         closeRefModal();
     }
 
+    // --- Reference Crop (handle-based overlay) --- //
+    // refCropRect is the crop rectangle in ref *visible-content* pixels. It starts
+    // as the full visible reference and is adjusted via draggable handles.
+
+    function enterCropMode() {
+        if (!refImgSrc) return;
+        const img = refImgEl();
+        if (!img) return;
+        refState.visible = true;
+        refState.isMoving = false; // crop takes over pointer handling
+        refCropMode = true;
+        // Initialize the box to the whole currently-visible reference.
+        const d = refCropDims();
+        refCropRect = { x: 0, y: 0, w: d.w, h: d.h };
+        updateRefTransform();
+        document.getElementById('ref-edit-banner').classList.remove('show');
+        document.getElementById('ref-crop-banner').classList.add('show');
+        document.getElementById('crop-overlay').classList.add('show');
+        document.getElementById('ref-crop-apply').disabled = false;
+        positionCropOverlay();
+        closeRefModal();
+        toast("Drag the handles to frame the crop");
+    }
+
+    function exitCropMode(silent) {
+        refCropMode = false;
+        refCropRect = null;
+        cropDrag = null;
+        document.getElementById('crop-overlay').classList.remove('show');
+        document.getElementById('ref-crop-banner').classList.remove('show');
+        if (!silent) { refState.isMoving = true; document.getElementById('ref-edit-banner').classList.add('show'); updateRefTransform(); }
+    }
+
+    function applyCrop() {
+        if (!refCropRect || refCropRect.w < 1 || refCropRect.h < 1) {
+            return toast("Crop area is empty", "warn");
+        }
+        const img = refImgEl();
+        const base = refState.crop || { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
+        const nx = Math.max(0, Math.round(base.x + refCropRect.x));
+        const ny = Math.max(0, Math.round(base.y + refCropRect.y));
+        const nw = Math.min(img.naturalWidth - nx, Math.round(refCropRect.w));
+        const nh = Math.min(img.naturalHeight - ny, Math.round(refCropRect.h));
+        if (nw < 1 || nh < 1) return toast("Crop area is empty", "warn");
+
+        // Keep the cropped region visually where it is on screen.
+        refState.x = refState.x + refCropRect.x * refState.scale;
+        refState.y = refState.y + refCropRect.y * refState.scale;
+        refState.crop = { x: nx, y: ny, w: nw, h: nh };
+
+        exitCropMode(true);
+        refState.isMoving = true;
+        document.getElementById('ref-edit-banner').classList.add('show');
+        updateRefTransform();
+        updateRefUI();
+        toast(`Cropped to ${nw}×${nh}`);
+    }
+
+    // Sync the DOM crop overlay to refCropRect using the reference transform.
+    // The overlay lives in #canvas-wrapper (canvas-pixel space), so multiply
+    // content pixels by refState.scale and offset by refState.x/y.
+    function positionCropOverlay() {
+        if (!refCropMode || !refCropRect) return;
+        const box = document.getElementById('crop-box');
+        const x = refState.x + refCropRect.x * refState.scale;
+        const y = refState.y + refCropRect.y * refState.scale;
+        const w = refCropRect.w * refState.scale;
+        const h = refCropRect.h * refState.scale;
+        box.style.left = x + 'px';
+        box.style.top = y + 'px';
+        box.style.width = w + 'px';
+        box.style.height = h + 'px';
+        // Counter-scale border + handles so they stay a constant on-screen size
+        // regardless of canvas zoom (wrapper scale = transform.scale).
+        const inv = 1 / transform.scale;
+        box.style.borderWidth = inv + 'px';
+        document.querySelectorAll('.crop-handle').forEach(hd => {
+            hd.style.transform = `scale(${inv})`;
+        });
+    }
+
+    // Convert a screen-pixel delta into ref-content-pixel delta.
+    function screenToContentDelta(dxScreen, dyScreen) {
+        const k = transform.scale * refState.scale;
+        return { dx: dxScreen / k, dy: dyScreen / k };
+    }
+
+    function beginCropDrag(e, handle) {
+        if (!refCropMode || !refCropRect) return;
+        e.stopPropagation();
+        if (e.cancelable) e.preventDefault();
+        cropDrag = {
+            pointerId: e.pointerId,
+            handle,                       // null = move whole box
+            sx: e.clientX, sy: e.clientY,
+            rect: { ...refCropRect }
+        };
+        e.target.setPointerCapture?.(e.pointerId);
+    }
+
+    function moveCropDrag(e) {
+        if (!cropDrag || e.pointerId !== cropDrag.pointerId) return;
+        if (e.cancelable) e.preventDefault();
+        const { dx, dy } = screenToContentDelta(e.clientX - cropDrag.sx, e.clientY - cropDrag.sy);
+        const r0 = cropDrag.rect;
+        const d = refCropDims();               // bounds of the current visible content
+        const MIN = 2;                          // minimum crop size in content px
+
+        if (!cropDrag.handle) {
+            // Move the whole box, clamped inside the content.
+            let nx = Math.max(0, Math.min(d.w - r0.w, r0.x + dx));
+            let ny = Math.max(0, Math.min(d.h - r0.h, r0.y + dy));
+            refCropRect = { x: nx, y: ny, w: r0.w, h: r0.h };
+        } else {
+            let { x, y, w, h } = r0;
+            const hd = cropDrag.handle;
+            // Left/right edges
+            if (hd.includes('w')) { const nx = Math.min(x + w - MIN, Math.max(0, x + dx)); w += (x - nx); x = nx; }
+            if (hd.includes('e')) { w = Math.max(MIN, Math.min(d.w - x, w + dx)); }
+            // Top/bottom edges
+            if (hd.includes('n')) { const ny = Math.min(y + h - MIN, Math.max(0, y + dy)); h += (y - ny); y = ny; }
+            if (hd.includes('s')) { h = Math.max(MIN, Math.min(d.h - y, h + dy)); }
+            refCropRect = { x, y, w, h };
+        }
+        positionCropOverlay();
+    }
+
+    function endCropDrag(e) {
+        if (!cropDrag || e.pointerId !== cropDrag.pointerId) return;
+        cropDrag = null;
+    }
+
+    // Wire up crop-box (move) and handles (resize). Handles stop propagation so a
+    // handle drag never also moves the box.
+    function initCropListeners() {
+        const box = document.getElementById('crop-box');
+        box.addEventListener('pointerdown', e => {
+            if (e.target.classList.contains('crop-handle')) return; // handled below
+            beginCropDrag(e, null);
+        });
+        document.querySelectorAll('.crop-handle').forEach(hd => {
+            hd.addEventListener('pointerdown', e => beginCropDrag(e, hd.dataset.h));
+        });
+        // Move/up on window so drags continue outside the element.
+        window.addEventListener('pointermove', moveCropDrag);
+        window.addEventListener('pointerup', endCropDrag);
+        window.addEventListener('pointercancel', endCropDrag);
+    }
+
     function resetRef(mode) {
         if (!refImgSrc) return;
-        const img = document.querySelector('#reference-layer img');
-        if (!img) return;
+        const d = refCropDims();
+        if (!d.w) return;
 
         if (mode === 'original') {
             refState.scale = 1;
-            refState.x = (W - img.naturalWidth) / 2;
-            refState.y = (H - img.naturalHeight) / 2;
+            refState.x = (W - d.w) / 2;
+            refState.y = (H - d.h) / 2;
             toast("Reset to 1:1 original size");
         } else if (mode === 'fit') {
-            let s = Math.min(W / img.naturalWidth, H / img.naturalHeight);
+            let s = Math.min(W / d.w, H / d.h);
             refState.scale = s;
-            refState.x = (W - img.naturalWidth * s) / 2;
-            refState.y = (H - img.naturalHeight * s) / 2;
+            refState.x = (W - d.w * s) / 2;
+            refState.y = (H - d.h * s) / 2;
             toast("Fit to canvas");
         }
         updateRefTransform();
+    }
+
+    function restoreRefOriginal() {
+        if (!refImgSrc) return;
+        if (!refState.crop) return toast("Reference isn't cropped");
+        refState.crop = null;
+        updateRefTransform();
+        updateRefUI();
+        toast("Full reference image restored");
     }
 
     function clearRef() {
@@ -939,7 +1446,13 @@
         document.getElementById('reference-layer').innerHTML = '';
         refState.isMoving = false;
         refState.visible = false;
+        refState.crop = null;
+        refCropMode = false;
+        refCropRect = null;
+        cropDrag = null;
         document.getElementById('ref-edit-banner').classList.remove('show');
+        document.getElementById('ref-crop-banner').classList.remove('show');
+        document.getElementById('crop-overlay').classList.remove('show');
         updateRefTransform();
         updateRefUI();
     }
@@ -971,11 +1484,39 @@
         reader.readAsDataURL(file);
     }
 
+    // Effective (cropped) dimensions of the reference in natural image pixels.
+    function refImgEl() { return document.querySelector('#reference-layer img'); }
+    function refCropDims() {
+        const img = refImgEl();
+        if (!img) return { w: 0, h: 0, x: 0, y: 0 };
+        if (refState.crop) return { ...refState.crop };
+        return { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
+    }
+
     function updateRefTransform() {
         const el = document.getElementById('reference-layer');
+        const img = refImgEl();
         el.style.transform = `translate(${refState.x}px, ${refState.y}px) scale(${refState.scale})`;
         el.style.opacity = refState.opacity;
         el.style.display = (refState.visible && refImgSrc) ? 'block' : 'none';
+
+        if (img) {
+            const c = refState.crop;
+            if (c) {
+                // Clip the img to the crop window, then shift it up/left so the
+                // window's top-left aligns with the layer origin. refState.x/y/scale
+                // then continue to address the visible (cropped) content directly.
+                const right = img.naturalWidth - (c.x + c.w);
+                const bottom = img.naturalHeight - (c.y + c.h);
+                img.style.clipPath = `inset(${c.y}px ${right}px ${bottom}px ${c.x}px)`;
+                img.style.marginLeft = `-${c.x}px`;
+                img.style.marginTop = `-${c.y}px`;
+            } else {
+                img.style.clipPath = '';
+                img.style.marginLeft = '';
+                img.style.marginTop = '';
+            }
+        }
     }
 
     // --- Modals --- //
@@ -992,7 +1533,7 @@
     }
     function closeProjectsModal() { document.getElementById('projects-modal').classList.remove('open'); }
 
-    // --- Dynamic Palette Manager & Lospec API --- //
+    // --- Dynamic Palette Manager & API --- //
 
     function selectColor(index) {
         activeColorIndex = index;
@@ -1057,6 +1598,42 @@
         closePaletteModal();
         scheduleAutosave();
     }
+    
+    function renderPresetMenu() {
+        const menu = document.getElementById('preset-menu');
+        menu.innerHTML = '';
+        for (const [name, colors] of Object.entries(PALETTE_PRESETS)) {
+            const item = document.createElement('div');
+            item.className = 'dropdown-item';
+            item.onclick = () => {
+                tempPalette = [...colors];
+                renderPaletteEditUI();
+                togglePresetMenu();
+            };
+
+            const title = document.createElement('div');
+            title.className = 'dropdown-item-title';
+            title.textContent = name;
+
+            const swatches = document.createElement('div');
+            swatches.className = 'dropdown-swatches';
+            colors.forEach(c => {
+                const s = document.createElement('div');
+                s.className = 'dropdown-swatch';
+                s.style.backgroundColor = c;
+                swatches.appendChild(s);
+            });
+
+            item.appendChild(title);
+            item.appendChild(swatches);
+            menu.appendChild(item);
+        }
+    }
+
+    function togglePresetMenu(e) {
+        if(e) e.stopPropagation();
+        document.getElementById('preset-menu').classList.toggle('show');
+    }
 
     async function fetchLospec() {
         const input = document.getElementById('lospec-id').value.trim();
@@ -1072,6 +1649,147 @@
         } catch (e) {
             toast(e.message, "warn");
         }
+    }
+
+    // --- Ramp Generator (hue-shift) --- //
+
+    let rampStyle = 'warm';   // 'warm' | 'rotate'
+    let rampSatArc = true;
+    // Warm/cool hue targets on the color wheel (degrees).
+    const WARM_HUE = 45;   // yellow-orange for highlights
+    const COOL_HUE = 255;  // blue-purple for shadows
+
+    function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h = 0, s = 0, l = (max + min) / 2;
+        if (max !== min) {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                default: h = (r - g) / d + 4; break;
+            }
+            h *= 60;
+        }
+        return { h, s: s * 100, l: l * 100 };
+    }
+
+    function hslToHex(h, s, l) {
+        h = ((h % 360) + 360) % 360; s = Math.max(0, Math.min(100, s)) / 100; l = Math.max(0, Math.min(100, l)) / 100;
+        const c = (1 - Math.abs(2 * l - 1)) * s;
+        const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+        const m = l - c / 2;
+        let r, g, b;
+        if (h < 60)      [r, g, b] = [c, x, 0];
+        else if (h < 120)[r, g, b] = [x, c, 0];
+        else if (h < 180)[r, g, b] = [0, c, x];
+        else if (h < 240)[r, g, b] = [0, x, c];
+        else if (h < 300)[r, g, b] = [x, 0, c];
+        else             [r, g, b] = [c, 0, x];
+        const to = v => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+        return '#' + to(r) + to(g) + to(b);
+    }
+
+    // Rotate hue `from` toward `target` by at most `amount` degrees along the
+    // shorter arc, without overshooting the target.
+    function rotateToward(from, target, amount) {
+        let diff = ((target - from + 540) % 360) - 180; // signed shortest delta [-180,180]
+        const step = Math.sign(diff) * Math.min(Math.abs(diff), amount);
+        return from + step;
+    }
+
+    // Build the ramp as an array of hex strings, base centered.
+    function buildRamp() {
+        const base = document.getElementById('ramp-base').value;
+        const n = parseInt(document.getElementById('ramp-len').value);
+        const hueStep = parseInt(document.getElementById('ramp-hue').value);
+        const lumSpread = parseInt(document.getElementById('ramp-lum').value);
+        const rgb = hexToRgb(base);
+        const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+        const mid = Math.floor(n / 2);
+
+        const out = [];
+        for (let i = 0; i < n; i++) {
+            const d = i - mid;            // <0 shadow, 0 base, >0 highlight
+            if (d === 0) { out.push({ hex: base, base: true }); continue; }
+            const t = Math.abs(d) / mid;  // 0..1 distance from base
+
+            // Luminance: linear toward the ends.
+            let l = hsl.l + (d / mid) * lumSpread;
+
+            // Hue.
+            let h = hsl.h;
+            if (rampStyle === 'rotate') {
+                h = hsl.h + d * hueStep;              // signed linear rotation
+            } else {
+                const target = d < 0 ? COOL_HUE : WARM_HUE;
+                h = rotateToward(hsl.h, target, Math.abs(d) * hueStep);
+            }
+
+            // Saturation arc: drop saturation toward the extremes.
+            let s = hsl.s;
+            if (rampSatArc) s = hsl.s * (1 - 0.4 * t * t);
+
+            out.push({ hex: hslToHex(h, s, l), base: false });
+        }
+        return out;
+    }
+
+    function openRampModal() {
+        // Seed base from the active palette color.
+        document.getElementById('ramp-base').value = palette[activeColorIndex] || '#b13e53';
+        renderRamp();
+        document.getElementById('ramp-modal').classList.add('open');
+    }
+    function closeRampModal() { document.getElementById('ramp-modal').classList.remove('open'); }
+
+    function setRampStyle(s) {
+        rampStyle = s;
+        document.getElementById('ramp-style-warm').classList.toggle('active', s === 'warm');
+        document.getElementById('ramp-style-rotate').classList.toggle('active', s === 'rotate');
+        renderRamp();
+    }
+
+    function toggleSatArc() {
+        rampSatArc = !rampSatArc;
+        const b = document.getElementById('ramp-satarc');
+        b.classList.toggle('active', rampSatArc);
+        b.textContent = rampSatArc ? 'On' : 'Off';
+        renderRamp();
+    }
+
+    function renderRamp() {
+        // Live labels.
+        document.getElementById('ramp-len-val').textContent = document.getElementById('ramp-len').value;
+        document.getElementById('ramp-hue-val').textContent = document.getElementById('ramp-hue').value + '°';
+        const lum = parseInt(document.getElementById('ramp-lum').value);
+        document.getElementById('ramp-lum-val').textContent = lum < 20 ? 'Subtle' : lum < 34 ? 'Medium' : 'Wide';
+
+        const ramp = buildRamp();
+        const prev = document.getElementById('ramp-preview');
+        prev.innerHTML = '';
+        ramp.forEach(sw => {
+            const el = document.createElement('div');
+            el.className = 'ramp-swatch' + (sw.base ? ' base' : '');
+            el.style.background = sw.hex;
+            prev.appendChild(el);
+        });
+    }
+
+    function addRampToPalette() {
+        const ramp = buildRamp().map(s => s.hex);
+        // Append, skipping exact dupes already in tempPalette.
+        let added = 0;
+        ramp.forEach(hex => {
+            if (!tempPalette.some(p => p.toLowerCase() === hex.toLowerCase())) {
+                tempPalette.push(hex); added++;
+            }
+        });
+        renderPaletteEditUI();
+        closeRampModal();
+        toast(added ? `Added ${added} color${added !== 1 ? 's' : ''} to palette` : 'Ramp colors already in palette');
     }
 
     // --- Canvas Initialization --- //
@@ -1466,6 +2184,7 @@
     function updateTransform() {
         wrapper.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`;
         renderGrid();
+        if (refCropMode) positionCropOverlay();
     }
 
     function cancelLongPress() {
@@ -1474,10 +2193,17 @@
     }
 
     workspace.addEventListener('pointerdown', e => {
-        if (e.target.closest('#ui-top') || e.target.closest('#ui-bottom') || e.target.closest('#layer-panel') || e.target.closest('.modal-overlay') || e.target.closest('#fit-btn') || e.target.closest('#ref-edit-banner')) return;
+        if (e.target.closest('#ui-top') || e.target.closest('#ui-bottom') || e.target.closest('#layer-panel') || e.target.closest('.modal-overlay') || e.target.closest('#fit-btn') || e.target.closest('#ref-edit-banner') || e.target.closest('#ref-crop-banner')) return;
         if (e.cancelable) e.preventDefault();
 
         activePointers.set(e.pointerId, e);
+
+        if (refCropMode) {
+            // Handles/box have their own listeners; ignore raw workspace input here.
+            isDrawing = false;
+            cancelLongPress();
+            return;
+        }
 
         if (refState.isMoving) {
             isDrawing = false;
@@ -1528,6 +2254,8 @@
             cancelLongPress();
         }
 
+        if (refCropMode) return; // handled by crop-box/handle listeners
+
         if (refState.isMoving) {
             if (activePointers.size === 1 && refDrag) {
                 let p = Array.from(activePointers.values())[0];
@@ -1566,7 +2294,9 @@
 
     const endPointer = (e) => {
         cancelLongPress();
-        
+
+        if (refCropMode) { activePointers.delete(e.pointerId); return; }
+
         if (refState.isMoving) {
             activePointers.delete(e.pointerId);
             if (activePointers.size < 2) refPinch = null;
@@ -1600,7 +2330,8 @@
         if (pos.x < 0 || pos.x >= W || pos.y < 0 || pos.y >= H) return;
 
         if (fromLongPress && isDrawing) {
-            if (['pen', 'eraser', 'dither', 'shade'].includes(currentTool)) {
+            if (FREEHAND.includes(currentTool)) {
+                shadeBuf = null;
                 const saved = history[historyIdx];
                 if (saved && saved[activeIndex]) activeCtx().putImageData(saved[activeIndex].data, 0, 0);
             } else {
@@ -1625,70 +2356,78 @@
         toast('Transparent pixel — nothing to pick');
     }
 
-    // --- Tool Routing --- //
+    // --- Tool Registry & Routing --- //
+    // Each tool declares optional onStart / onMove / onEnd handlers.
+    // Adding a tool = adding one entry here; no more scattered includes() checks.
 
-    function processStartTool(pos) {
-        if (currentTool === 'eyedropper') {
-            triggerEyedropper(pos, false);
-        }
-        else if (['pen', 'eraser', 'dither', 'shade'].includes(currentTool)) {
+    // Freehand pixel tools share one start-shade-mutate lifecycle.
+    const FREEHAND = ['pen', 'eraser', 'dither', 'shade'];
+
+    const freehandTool = {
+        onStart(pos) {
             markDirty(activeIndex);
             strokeVisited = new Set();
+            beginShadeStroke();
             drawLine(activeCtx(), pos.x, pos.y, pos.x, pos.y);
-        }
-        else if (currentTool === 'fill') { runFill(pos.x, pos.y); }
-        else if (currentTool === 'wand') { doMagicWand(pos.x, pos.y); }
-        else if (['line', 'rect', 'circle'].includes(currentTool)) {
-            drawDraftShape(startPos, startPos, currentTool);
-        }
-        else if (currentTool === 'move') {
-            if (!selectionRect) selectionRect = { x: 0, y: 0, w: W, h: H };
-            if (!moveBuffer) {
-                markDirty(activeIndex);
-                moveBuffer = activeCtx().getImageData(selectionRect.x, selectionRect.y, selectionRect.w, selectionRect.h);
-                activeCtx().clearRect(selectionRect.x, selectionRect.y, selectionRect.w, selectionRect.h);
-            }
-            moveStartPos = pos;
-            originalSelection = { ...selectionRect };
-            drawSelectionBox();
-        }
-    }
+        },
+        onMove(pos) { drawLine(activeCtx(), lastPos.x, lastPos.y, pos.x, pos.y); },
+        onEnd() { endShadeStroke(); saveHistory(); }
+    };
 
-    function processMoveTool(pos) {
-        if (['pen', 'eraser', 'dither', 'shade'].includes(currentTool)) { 
-            drawLine(activeCtx(), lastPos.x, lastPos.y, pos.x, pos.y); 
-        }
-        else if (['line', 'rect', 'circle'].includes(currentTool)) { drawDraftShape(startPos, pos, currentTool); }
-        else if (currentTool === 'marquee') {
-            uiCtx.clearRect(0, 0, W, H); uiCtx.setLineDash([3, 3]); uiCtx.strokeStyle = 'white';
-            let x = Math.min(startPos.x, pos.x), y = Math.min(startPos.y, pos.y);
-            let w = Math.abs(pos.x - startPos.x) + 1, h = Math.abs(pos.y - startPos.y) + 1;
-            uiCtx.strokeRect(x, y, w, h);
-        }
-        else if (currentTool === 'move' && moveBuffer && originalSelection) {
-            let dx = pos.x - moveStartPos.x, dy = pos.y - moveStartPos.y;
-            selectionRect.x = originalSelection.x + dx; selectionRect.y = originalSelection.y + dy;
-            draftCtx.clearRect(0, 0, W, H); draftCtx.putImageData(moveBuffer, selectionRect.x, selectionRect.y);
-            drawSelectionBox();
-        }
-    }
+    const shapeTool = {
+        onStart() { drawDraftShape(startPos, startPos, currentTool); },
+        onMove(pos) { drawDraftShape(startPos, pos, currentTool); },
+        onEnd() { stampDraftToActive(); saveHistory(); }
+    };
 
-    function processEndTool(pos) {
-        if (['pen', 'eraser', 'dither', 'shade'].includes(currentTool)) { saveHistory(); }
-        else if (['line', 'rect', 'circle'].includes(currentTool)) { stampDraftToActive(); saveHistory(); }
-        else if (currentTool === 'marquee') {
-            let w = Math.abs(pos.x - startPos.x) + 1, h = Math.abs(pos.y - startPos.y) + 1;
-            if (w <= 1 && h <= 1) {
-                clearSelection();
-                return;
+    const TOOLS = {
+        pen: freehandTool, eraser: freehandTool, dither: freehandTool, shade: freehandTool,
+        line: shapeTool, rect: shapeTool, circle: shapeTool,
+
+        eyedropper: { onStart(pos) { triggerEyedropper(pos, false); } },
+        fill: { onStart(pos) { runFill(pos.x, pos.y); } },
+        wand: { onStart(pos) { doMagicWand(pos.x, pos.y); } },
+
+        marquee: {
+            onMove(pos) {
+                uiCtx.clearRect(0, 0, W, H); uiCtx.setLineDash([3, 3]); uiCtx.strokeStyle = 'white';
+                let x = Math.min(startPos.x, pos.x), y = Math.min(startPos.y, pos.y);
+                let w = Math.abs(pos.x - startPos.x) + 1, h = Math.abs(pos.y - startPos.y) + 1;
+                uiCtx.strokeRect(x, y, w, h);
+            },
+            onEnd(pos) {
+                let w = Math.abs(pos.x - startPos.x) + 1, h = Math.abs(pos.y - startPos.y) + 1;
+                if (w <= 1 && h <= 1) { clearSelection(); return; }
+                selectionRect = { x: Math.min(startPos.x, pos.x), y: Math.min(startPos.y, pos.y), w, h };
+                drawSelectionBox();
             }
-            selectionRect = {
-                x: Math.min(startPos.x, pos.x), y: Math.min(startPos.y, pos.y),
-                w: w, h: h
-            };
-            drawSelectionBox();
+        },
+
+        move: {
+            onStart(pos) {
+                if (!selectionRect) selectionRect = { x: 0, y: 0, w: W, h: H };
+                if (!moveBuffer) {
+                    markDirty(activeIndex);
+                    moveBuffer = activeCtx().getImageData(selectionRect.x, selectionRect.y, selectionRect.w, selectionRect.h);
+                    activeCtx().clearRect(selectionRect.x, selectionRect.y, selectionRect.w, selectionRect.h);
+                }
+                moveStartPos = pos;
+                originalSelection = { ...selectionRect };
+                drawSelectionBox();
+            },
+            onMove(pos) {
+                if (!moveBuffer || !originalSelection) return;
+                let dx = pos.x - moveStartPos.x, dy = pos.y - moveStartPos.y;
+                selectionRect.x = originalSelection.x + dx; selectionRect.y = originalSelection.y + dy;
+                draftCtx.clearRect(0, 0, W, H); draftCtx.putImageData(moveBuffer, selectionRect.x, selectionRect.y);
+                drawSelectionBox();
+            }
         }
-    }
+    };
+
+    function processStartTool(pos) { TOOLS[currentTool]?.onStart?.(pos); }
+    function processMoveTool(pos)  { TOOLS[currentTool]?.onMove?.(pos); }
+    function processEndTool(pos)   { TOOLS[currentTool]?.onEnd?.(pos); }
 
     // --- Graphics Engines --- //
 
@@ -1704,35 +2443,68 @@
         };
     }
 
+    // Shade stroke buffer: read the layer once at stroke start, mutate the
+    // typed array as the stroke moves, flush once at stroke end. Avoids a
+    // getImageData/putImageData round-trip per pixel.
+    let shadeBuf = null;
+
+    function beginShadeStroke() {
+        if (currentTool !== 'shade') { shadeBuf = null; return; }
+        shadeBuf = activeCtx().getImageData(0, 0, W, H);
+    }
+
+    function endShadeStroke() {
+        if (shadeBuf) { activeCtx().putImageData(shadeBuf, 0, 0); shadeBuf = null; }
+    }
+
+    // Nearest palette color by squared RGB distance (used by palette lock).
+    function nearestPaletteRgb(r, g, b) {
+        let best = null, bestD = Infinity;
+        for (let i = 0; i < palette.length; i++) {
+            const c = hexToRgb(palette[i]);
+            const d = (c[0]-r)**2 + (c[1]-g)**2 + (c[2]-b)**2;
+            if (d < bestD) { bestD = d; best = c; }
+        }
+        return best || [r, g, b, 255];
+    }
+
     function drawPixel(ctx, x, y) {
         const erase = currentTool === 'eraser';
         const shade = currentTool === 'shade';
         if (!erase && !shade) ctx.fillStyle = getCol();
-        
+
         let o = Math.floor(brushSize / 2);
         let s = brushSize;
+        const amt = shadeMode === 'lighten' ? 20 : -20;
+        const data = shadeBuf ? shadeBuf.data : null;
+        // Round brush: reject cells outside the inscribed circle (only matters for size >= 2).
+        const round = brushShape === 'round' && s >= 2;
+        const cxc = (s - 1) / 2, rad2 = ((s) / 2) ** 2;
 
         const put = (px, py) => {
             for(let dx = 0; dx < s; dx++) {
                 for(let dy = 0; dy < s; dy++) {
+                    if (round && ((dx - cxc) ** 2 + (dy - cxc) ** 2) > rad2) continue;
+
                     let cx = px - o + dx;
                     let cy = py - o + dy;
-                    
+
                     if (currentTool === 'dither' && (cx + cy) % 2 !== 0) continue;
-                    
+
                     if (shade) {
+                        if (cx < 0 || cx >= W || cy < 0 || cy >= H) continue;
                         let key = cx + "," + cy;
                         if (strokeVisited.has(key)) continue;
                         strokeVisited.add(key);
-                        
-                        if (cx < 0 || cx >= W || cy < 0 || cy >= H) continue;
-                        let img = ctx.getImageData(cx, cy, 1, 1);
-                        if (img.data[3] > 0) {
-                            let amt = shadeMode === 'lighten' ? 20 : -20;
-                            img.data[0] = Math.max(0, Math.min(255, img.data[0] + amt));
-                            img.data[1] = Math.max(0, Math.min(255, img.data[1] + amt));
-                            img.data[2] = Math.max(0, Math.min(255, img.data[2] + amt));
-                            ctx.putImageData(img, cx, cy);
+                        if (!data) continue;
+
+                        let p = (cy * W + cx) * 4;
+                        if (data[p + 3] > 0) {
+                            let nr = Math.max(0, Math.min(255, data[p]     + amt));
+                            let ng = Math.max(0, Math.min(255, data[p + 1] + amt));
+                            let nb = Math.max(0, Math.min(255, data[p + 2] + amt));
+                            if (paletteLock) { const c = nearestPaletteRgb(nr, ng, nb); nr = c[0]; ng = c[1]; nb = c[2]; }
+                            data[p] = nr; data[p + 1] = ng; data[p + 2] = nb;
                         }
                     } else if (erase) {
                         ctx.clearRect(cx, cy, 1, 1);
@@ -1760,6 +2532,8 @@
             if (e2 > -dx) { err -= dy; x0 += sx; }
             if (e2 < dy) { err += dx; y0 += sy; }
         }
+        // Flush the shade buffer once per segment (not per pixel) for live feedback.
+        if (currentTool === 'shade' && shadeBuf) ctx.putImageData(shadeBuf, 0, 0);
     }
 
     function hexToRgb(hex) {
@@ -1789,12 +2563,17 @@
 
         if (tc[0] === fc[0] && tc[1] === fc[1] && tc[2] === fc[2] && tc[3] === fc[3]) return;
 
-        let stack = [[startX, startY]];
+        // Flat integer stack (y*W+x) instead of [x,y] arrays: no per-pixel allocation.
+        let stack = [startY * W + startX];
         while (stack.length) {
-            let [x, y] = stack.pop(), p = (y * W + x) * 4;
+            let idx = stack.pop();
+            let x = idx % W, y = (idx / W) | 0, p = idx * 4;
             if (x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1 && data[p] === tc[0] && data[p+1] === tc[1] && data[p+2] === tc[2] && data[p+3] === tc[3]) {
                 data[p] = fc[0]; data[p+1] = fc[1]; data[p+2] = fc[2]; data[p+3] = 255;
-                stack.push([x+1, y], [x-1, y], [x, y+1], [x, y-1]);
+                if (x + 1 <= b.x1) stack.push(idx + 1);
+                if (x - 1 >= b.x0) stack.push(idx - 1);
+                if (y + 1 <= b.y1) stack.push(idx + W);
+                if (y - 1 >= b.y0) stack.push(idx - W);
             }
         }
         ctx.putImageData(imgData, 0, 0);
@@ -1809,14 +2588,14 @@
         if (tc[3] === 0) return toast("Cannot select transparent areas");
 
         let visited = new Uint8Array(w * h);
-        let stack = [[startX, startY]];
+        let stack = [startY * w + startX];
         let minX = startX, maxX = startX, minY = startY, maxY = startY;
         let selectedPixels = [];
 
         while (stack.length) {
-            let [x, y] = stack.pop();
-            let idx = y * w + x;
+            let idx = stack.pop();
             if (visited[idx]) continue;
+            let x = idx % w, y = (idx / w) | 0;
             let p = idx * 4;
             if (data[p] === tc[0] && data[p+1] === tc[1] && data[p+2] === tc[2] && data[p+3] === tc[3]) {
                 visited[idx] = 1;
@@ -1825,10 +2604,10 @@
                 if (x > maxX) maxX = x;
                 if (y < minY) minY = y;
                 if (y > maxY) maxY = y;
-                if (x > 0) stack.push([x-1, y]);
-                if (x < w - 1) stack.push([x+1, y]);
-                if (y > 0) stack.push([x, y-1]);
-                if (y < h - 1) stack.push([x, y+1]);
+                if (x > 0) stack.push(idx - 1);
+                if (x < w - 1) stack.push(idx + 1);
+                if (y > 0) stack.push(idx - w);
+                if (y < h - 1) stack.push(idx + w);
             }
         }
 
@@ -1965,6 +2744,124 @@
         draftCtx.clearRect(0, 0, W, H); draftCtx.putImageData(moveBuffer, selectionRect.x, selectionRect.y);
         drawSelectionBox();
         toast("Pasted — drag to position it");
+    }
+
+    // --- Selection Transforms --- //
+    // Operate on the active selection, or the whole layer if nothing is selected.
+
+    function transformRegion() {
+        const b = selBounds();
+        return { x: b.x0, y: b.y0, w: b.x1 - b.x0 + 1, h: b.y1 - b.y0 + 1 };
+    }
+
+    function flipSel(dir) {
+        commitMove();
+        const r = transformRegion();
+        const ctx = activeCtx();
+        markDirty(activeIndex);
+        const src = ctx.getImageData(r.x, r.y, r.w, r.h);
+        const out = ctx.createImageData(r.w, r.h);
+        for (let y = 0; y < r.h; y++) {
+            for (let x = 0; x < r.w; x++) {
+                const sx = dir === 'h' ? (r.w - 1 - x) : x;
+                const sy = dir === 'v' ? (r.h - 1 - y) : y;
+                const sp = (sy * r.w + sx) * 4, dp = (y * r.w + x) * 4;
+                out.data[dp] = src.data[sp]; out.data[dp+1] = src.data[sp+1];
+                out.data[dp+2] = src.data[sp+2]; out.data[dp+3] = src.data[sp+3];
+            }
+        }
+        ctx.putImageData(out, r.x, r.y);
+        saveHistory();
+        toast(dir === 'h' ? 'Flipped horizontally' : 'Flipped vertically');
+    }
+
+    function rotateSel() {
+        commitMove();
+        const r = transformRegion();
+        const ctx = activeCtx();
+        // 90° CW rotation swaps width/height. Keep it centered on the region's center;
+        // clamp to canvas so a wide selection rotated tall doesn't spill off-canvas.
+        const src = ctx.getImageData(r.x, r.y, r.w, r.h);
+        const nw = r.h, nh = r.w;
+        const rot = ctx.createImageData(nw, nh);
+        for (let y = 0; y < r.h; y++) {
+            for (let x = 0; x < r.w; x++) {
+                const sp = (y * r.w + x) * 4;
+                const nx = r.h - 1 - y, ny = x;      // 90° clockwise
+                const dp = (ny * nw + nx) * 4;
+                rot.data[dp] = src.data[sp]; rot.data[dp+1] = src.data[sp+1];
+                rot.data[dp+2] = src.data[sp+2]; rot.data[dp+3] = src.data[sp+3];
+            }
+        }
+        const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+        let nx = Math.round(cx - nw / 2), ny = Math.round(cy - nh / 2);
+        nx = Math.max(0, Math.min(W - nw, nx));
+        ny = Math.max(0, Math.min(H - nh, ny));
+        markDirty(activeIndex);
+        ctx.clearRect(r.x, r.y, r.w, r.h);
+        // Paint rotated block via a temp canvas so out-of-bounds is safely clipped.
+        const tmp = document.createElement('canvas'); tmp.width = nw; tmp.height = nh;
+        tmp.getContext('2d').putImageData(rot, 0, 0);
+        ctx.drawImage(tmp, nx, ny);
+        if (selectionRect) { selectionRect = { x: nx, y: ny, w: nw, h: nh }; drawSelectionBox(); }
+        saveHistory();
+        toast('Rotated 90°');
+    }
+
+    // --- Color Count Readout --- //
+
+    function showColors() {
+        commitMove();
+        // Merge visible layers, then tally distinct opaque colors.
+        const c = document.createElement('canvas'); c.width = W; c.height = H;
+        const cctx = c.getContext('2d'); cctx.imageSmoothingEnabled = false;
+        layers.forEach(l => { if (l.visible) cctx.drawImage(l.canvas, 0, 0); });
+        const d = cctx.getImageData(0, 0, W, H).data;
+        const counts = new Map();
+        for (let i = 0; i < d.length; i += 4) {
+            if (d[i+3] < 8) continue; // ignore (near-)transparent
+            const hex = rgbToHex(d[i], d[i+1], d[i+2]);
+            counts.set(hex, (counts.get(hex) || 0) + 1);
+        }
+        const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+        renderColorsModal(sorted);
+        document.getElementById('colors-modal').classList.add('open');
+    }
+    function closeColorsModal() { document.getElementById('colors-modal').classList.remove('open'); }
+
+    function renderColorsModal(sorted) {
+        const total = sorted.reduce((s, e) => s + e[1], 0);
+        document.getElementById('colors-count').textContent =
+            `${sorted.length} color${sorted.length !== 1 ? 's' : ''} used`;
+        const list = document.getElementById('colors-list');
+        list.innerHTML = '';
+        if (!sorted.length) {
+            list.innerHTML = `<div class="proj-empty">Canvas is empty.</div>`;
+            return;
+        }
+        sorted.forEach(([hex, n]) => {
+            const inPal = palette.some(p => p.toLowerCase() === hex.toLowerCase());
+            const row = document.createElement('div');
+            row.className = 'color-row';
+            const pct = ((n / total) * 100).toFixed(1);
+            row.innerHTML = `
+                <span class="color-chip" style="background:${hex}"></span>
+                <span class="color-hex">${hex}</span>
+                <span class="color-pct">${pct}%</span>
+                <button class="pill mini ${inPal ? 'active' : ''}" ${inPal ? 'disabled' : ''}
+                    onclick="addSwatchToPalette('${hex}')">${inPal ? 'In palette' : '+ Add'}</button>`;
+            list.appendChild(row);
+        });
+    }
+
+    function addSwatchToPalette(hex) {
+        if (palette.some(p => p.toLowerCase() === hex.toLowerCase())) return;
+        palette.push(hex);
+        refreshPaletteUI();
+        scheduleAutosave();
+        toast(`Added ${hex} to palette`, '', hex);
+        // Reflect the change in the open modal.
+        showColors();
     }
 
     function historyCap() {
