@@ -557,6 +557,165 @@
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  /* ============ LEARN PANEL ============ */
+  /* Launcher — floats at top-right, below the transport, clear of the bottom dock */
+  #learnHandle{
+    position:fixed;right:12px;
+    top:calc(env(safe-area-inset-top,0px) + 118px);z-index:44;
+    display:flex;align-items:center;gap:7px;
+    height:34px;padding:0 13px 0 11px;border-radius:20px;cursor:pointer;
+    background:linear-gradient(180deg,#2f333c,#262930);
+    border:1px solid var(--line);color:var(--ink);
+    font-weight:800;font-size:12px;letter-spacing:.3px;
+    box-shadow:0 4px 14px rgba(0,0,0,.4);
+    transition:transform .1s,background .12s;
+  }
+  #learnHandle:active{transform:scale(.96);}
+  #learnHandle svg{width:16px;height:16px;stroke:var(--go);fill:none;stroke-width:2;}
+  #learnHandle .lh-prog{color:var(--ink-faint);font-weight:700;font-size:10.5px;}
+
+  /* Overlay scrim */
+  #learnScrim{
+    position:fixed;inset:0;z-index:60;background:rgba(8,9,12,.55);
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  #learnScrim.show{opacity:1;pointer-events:auto;}
+
+  /* The panel itself */
+  #learnPanel{
+    position:fixed;z-index:70;background:var(--bg);
+    display:flex;flex-direction:column;
+    /* PHONE default: bottom sheet, most of the screen */
+    left:0;right:0;bottom:0;height:88vh;max-width:520px;margin:0 auto;
+    border-radius:20px 20px 0 0;border:1px solid var(--line);
+    box-shadow:0 -10px 40px rgba(0,0,0,.6);
+    transform:translateY(102%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  }
+  #learnPanel.show{transform:translateY(0);}
+
+  .learn-head{
+    flex:0 0 auto;display:flex;align-items:center;gap:10px;
+    padding:12px 14px;border-bottom:1px solid var(--line-soft);
+    background:linear-gradient(180deg,var(--chassis-2),var(--chassis));
+    border-radius:20px 20px 0 0;
+  }
+  .learn-grip{
+    position:absolute;top:7px;left:50%;transform:translateX(-50%);
+    width:38px;height:4px;border-radius:3px;background:var(--line);
+  }
+  .learn-head .lh-title{font-weight:800;font-size:15px;flex:1;letter-spacing:.2px;}
+  .learn-head .lh-back{
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);display:none;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;
+  }
+  .learn-head .lh-back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;}
+  .learn-head .lh-close{
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink-dim);font-size:20px;cursor:pointer;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+  .learn-head .lh-close:active,.learn-head .lh-back:active{background:var(--panel-2);}
+
+  .learn-body{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 28px;}
+
+  /* Lesson list */
+  .vol-group{margin-bottom:18px;}
+  .vol-label{
+    font-size:10px;text-transform:uppercase;letter-spacing:1.3px;color:var(--go);
+    font-weight:800;margin:0 0 8px 2px;
+  }
+  .lesson-item{
+    display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+    background:var(--chassis-2);border:1px solid var(--line-soft);border-radius:12px;
+    padding:12px 13px;margin-bottom:7px;cursor:pointer;color:var(--ink);
+    transition:background .1s,border-color .1s;
+  }
+  .lesson-item:active{background:var(--panel);}
+  .lesson-item.done{border-color:rgba(61,220,132,.35);}
+  .li-check{
+    flex:0 0 auto;width:26px;height:26px;border-radius:50%;
+    border:2px solid var(--line);display:flex;align-items:center;justify-content:center;
+    color:transparent;font-size:14px;font-weight:900;transition:all .12s;
+  }
+  .lesson-item.done .li-check{background:var(--go);border-color:var(--go);color:#06231a;}
+  .li-num{flex:0 0 auto;width:30px;font-family:"SFMono-Regular",monospace;font-weight:800;font-size:13px;color:var(--ink-faint);text-align:center;}
+  .li-main{flex:1;min-width:0;}
+  .li-title{font-weight:700;font-size:13.5px;line-height:1.3;}
+  .li-time{font-size:11px;color:var(--ink-faint);font-weight:600;margin-top:1px;}
+  .li-arrow{flex:0 0 auto;color:var(--ink-faint);font-size:16px;}
+  .lesson-item.ref .li-num{font-size:15px;}
+
+  /* Single lesson reader */
+  #lessonReader{display:none;}
+  #lessonReader.active{display:block;}
+  #lessonList.hidden{display:none;}
+  .reader-meta{
+    display:flex;align-items:center;gap:8px;margin-bottom:4px;
+    font-size:11px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  }
+  .reader-meta .rm-time{color:var(--amber);}
+  #readerTitle{font-size:19px;font-weight:800;line-height:1.25;margin:0 0 14px;letter-spacing:.2px;}
+  .reader-content{font-size:14.5px;line-height:1.62;color:var(--ink-dim);}
+  .reader-content p{margin:0 0 12px;}
+  .reader-content strong{color:var(--ink);font-weight:700;}
+  .reader-content em{color:var(--ink);font-style:italic;}
+  .reader-content h3{font-size:15px;color:var(--ink);margin:20px 0 8px;font-weight:800;letter-spacing:.2px;}
+  .reader-content h4{font-size:13.5px;color:var(--lead);margin:16px 0 6px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
+  .reader-content ul,.reader-content ol{margin:0 0 13px;padding-left:22px;}
+  .reader-content li{margin-bottom:7px;}
+  .reader-content code{
+    background:#181a1f;border:1px solid var(--line-soft);border-radius:5px;
+    padding:1px 6px;font-family:"SFMono-Regular",monospace;font-size:12.5px;color:var(--amber);
+  }
+  .reader-content blockquote{
+    margin:0 0 14px;padding:11px 14px;border-left:3px solid var(--go);
+    background:var(--go-soft);border-radius:0 10px 10px 0;color:var(--ink);font-size:13.5px;
+  }
+  .reader-content hr{border:none;border-top:1px solid var(--line-soft);margin:18px 0;}
+
+  /* prev/next nav + mark-done controls in reader */
+  .reader-nav{
+    display:flex;gap:9px;margin:22px 0 9px;padding-top:16px;border-top:1px solid var(--line-soft);
+  }
+  .reader-nav button{
+    flex:1;min-height:48px;border-radius:12px;font-weight:800;font-size:13.5px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);transition:transform .05s,background .1s;
+  }
+  .reader-nav button:active{transform:scale(.97);background:var(--panel-2);}
+  .reader-nav button:disabled{opacity:.32;cursor:default;}
+  .reader-nav button:disabled:active{transform:none;background:var(--panel);}
+  #nextLessonBtn{background:linear-gradient(180deg,#48e895,var(--go));color:#06231a;border:none;box-shadow:0 3px 0 #1f7d4c;}
+  #nextLessonBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #1f7d4c;}
+  #nextLessonBtn:disabled{opacity:.4;box-shadow:none;}
+  .reader-actions{
+    display:flex;gap:9px;margin:0 0 6px;
+  }
+  .reader-actions button{
+    flex:1;min-height:46px;border-radius:12px;font-weight:800;font-size:13.5px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);
+  }
+  #markDoneBtn{background:var(--panel);color:var(--ink);}
+  #markDoneBtn.done{background:var(--go-soft);border-color:var(--go);color:var(--go);}
+
+  /* ---- TABLET / DESKTOP: side panel instead of bottom sheet ---- */
+  @media (min-width:820px){
+    #learnPanel{
+      left:auto;right:0;top:0;bottom:0;height:100vh;width:420px;max-width:420px;margin:0;
+      border-radius:0;border-left:1px solid var(--line);
+      transform:translateX(102%);
+    }
+    #learnPanel.show{transform:translateX(0);}
+    .learn-head{border-radius:0;}
+    .learn-grip{display:none;}
+    #learnScrim.show{opacity:0;pointer-events:none;} /* no dark scrim on desktop; panel sits beside */
+    #app{transition:margin-right .28s cubic-bezier(.4,0,.2,1);}
+    body.learn-open #app{margin-right:420px;}
+    body.learn-open #tabbar{margin-right:420px;transition:margin-right .28s cubic-bezier(.4,0,.2,1);}
+    body.learn-open #dock{margin-right:420px;transition:margin-right .28s cubic-bezier(.4,0,.2,1);}
+    body.learn-open #learnHandle{right:calc(420px + 12px);}
+  }
+
   @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
 </style>
 </head>
@@ -872,6 +1031,37 @@
 </nav>
 
 <div id="countIn"><div class="cnum" id="countNum">4</div></div>
+
+<!-- ===== LEARN ===== -->
+<button id="learnHandle" aria-label="Open lessons">
+  <svg viewBox="0 0 24 24"><path d="M4 5.5A2 2 0 0 1 6 4h5v15H6a2 2 0 0 0-2 1.5z"/><path d="M20 5.5A2 2 0 0 0 18 4h-5v15h5a2 2 0 0 1 2 1.5z"/></svg>
+  Learn <span class="lh-prog" id="learnProg"></span>
+</button>
+<div id="learnScrim"></div>
+<div id="learnPanel" role="dialog" aria-label="Lessons">
+  <div class="learn-head">
+    <div class="learn-grip"></div>
+    <button class="lh-back" id="learnBack" aria-label="Back to list"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="lh-title" id="learnTitle">Lessons</div>
+    <button class="lh-close" id="learnClose" aria-label="Close">✕</button>
+  </div>
+  <div class="learn-body">
+    <div id="lessonList"></div>
+    <div id="lessonReader">
+      <div class="reader-meta"><span id="readerVol"></span><span class="rm-time" id="readerTime"></span></div>
+      <h2 id="readerTitle"></h2>
+      <div class="reader-content" id="readerContent"></div>
+      <div class="reader-nav">
+        <button id="prevLessonBtn">← Previous</button>
+        <button id="nextLessonBtn">Next →</button>
+      </div>
+      <div class="reader-actions">
+        <button id="markDoneBtn"><span id="markDoneLabel">Mark done</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1444,6 +1634,7 @@ function updateDock(){
     dockTag.textContent='—'; dockTag.className='dh-tag';
     dockVal.innerHTML='Tap a cell to fill it';
     dockKeysWrap.style.display='none'; dockDrumsWrap.style.display='none'; dockEmpty.style.display='block';
+    if(typeof updateLearnHandle==='function') updateLearnHandle();
     return;
   }
   let ch=parseInt(selectedCell.dataset.channel);
@@ -1456,6 +1647,7 @@ function updateDock(){
   dockEmpty.style.display='none';
   if(ch===3){dockDrumsWrap.style.display='block';dockKeysWrap.style.display='none';}
   else{dockKeysWrap.style.display='block';dockDrumsWrap.style.display='none';}
+  if(typeof updateLearnHandle==='function') updateLearnHandle();
 }
 
 /* move selection down one row in the same column */
@@ -1492,6 +1684,12 @@ const viewSong=document.getElementById('view-song');
 function setDockCollapsed(c){
   dock.classList.toggle('collapsed',c);
   viewSong.classList.toggle('dock-collapsed',c);
+  updateLearnHandle();
+}
+/* Learn handle now lives top-right, clear of the dock — always visible. */
+function updateLearnHandle(){
+  const handle=document.getElementById('learnHandle');
+  if(handle) handle.style.display='flex';
 }
 dockHandle.addEventListener('click',e=>{
   if(e.target.closest('#advToggle')) return; // don't toggle when hitting the switch
@@ -1704,6 +1902,187 @@ document.querySelectorAll('.tab').forEach(tab=>{
     if(tab.dataset.tab==='synth') requestAnimationFrame(refreshCanvases);
   });
 });
+
+/* ============ LESSON DATA ============ */
+const LESSONS=[{"n":0,"v":"Vol 1 · Foundations","t":"Press play and listen","tm":"5 min","h":"<p>Goal: understand the loop before touching anything.</p>\n<ol>\n<li>Open the app. There's already a demo pattern loaded.</li>\n<li>Press the big green <strong>play</strong> button. Listen. Press it again to stop.</li>\n<li>Watch the highlighted row travel down the grid. <em>That moving row is \"now.\"</em> When it wraps back to the top, the loop repeats.</li>\n<li>Change the <strong>Tempo</strong> up and down. Notice fast vs. slow. Put it back around 120.</li>\n</ol>\n<p><strong>You learned:</strong> music here is a 16-step loop, and tempo is how fast the loop spins.</p>\n<hr>","ref":false},{"n":1,"v":"Vol 1 · Foundations","t":"Your first beat: kick and snare","tm":"15 min","h":"<p>The drum track is the skeleton. Almost every song in pop, hip-hop, rock, and dance is built on one idea: <strong>kick on 1, snare on 3.</strong></p>\n<ol>\n<li>Go to the <strong>Song</strong> tab and press <strong>Clear all</strong> to start empty. (Undo brings the demo back if you want it.)</li>\n<li>Tap the <strong>Drum</strong> cell on row <strong>00</strong>. In the drawer, tap <strong>KICK</strong>.</li>\n<li>Tap the <strong>Drum</strong> cell on row <strong>08</strong>. Tap <strong>SNARE</strong>.</li>\n<li>Press play. That \"boom … clap …\" is the heartbeat of most music you know.</li>\n</ol>\n<p>Now make it drive:</p>\n<ol>\n<li>Add a <strong>KICK</strong> on row <strong>04</strong> as well (so kicks are on 00 and 04, snare on 08).</li>\n<li>Try a kick on <strong>0C</strong> too. Play. Feel how more kicks = more push.</li>\n</ol>\n<p><strong>Challenge:</strong> put a <strong>SNARE</strong> on row <strong>0C</strong> instead of a kick. Boom-boom-clap-clap. Different feel, same skeleton.</p>\n<p><strong>You learned:</strong> the kick is the low pulse, the snare is the backbeat. Their placement <em>is</em> the groove.</p>\n<hr>","ref":false},{"n":2,"v":"Vol 1 · Foundations","t":"Hi-hats: filling the space","tm":"15 min","h":"<p>The hi-hat is the \"tick-tick-tick\" that fills the gaps and makes a beat feel busy and alive.</p>\n<ol>\n<li>Keep your kick+snare from Lesson 1.</li>\n<li>Put a <strong>HI-HAT</strong> on every <em>even</em> row that's empty: 02, 06, 0A, 0E. Play. Already more motion.</li>\n<li>Now go further — a hat on <strong>every</strong> empty row (01, 03, 05...). This is a \"16th-note hat.\" Common in trap and pop.</li>\n</ol>\n<p><strong>Here's where combos matter.</strong> On row 00 you have a kick <em>and</em> you'd like a hat ticking there too — but one cell holds one thing. That's what the <strong>KICK+HAT</strong> and <strong>SNARE+HAT</strong> pads are for:</p>\n<ol>\n<li>Change row <strong>00</strong> from KICK to <strong>KICK+HAT</strong>. Change row <strong>08</strong> from SNARE to <strong>SNARE+HAT</strong>.</li>\n<li>Now your hat ticks <em>through</em> the beats instead of stopping for them. Play. That's a real, full drum groove.</li>\n</ol>\n<p><strong>You learned:</strong> hats control energy and density. Combos let the hat keep going while the kick or snare also hits — that's how real beats are layered.</p>\n<hr>","ref":false},{"n":3,"v":"Vol 1 · Foundations","t":"Meet the scale","tm":"10 min","h":"<p>Before writing a single note, turn on the tool that makes notes sound <em>right</em>.</p>\n<ol>\n<li>Go to the <strong>Keys</strong> tab (or select a Bass/Lead cell so the keyboard appears in the drawer).</li>\n<li>Find the <strong>Key</strong> and <strong>Scale</strong> pickers. Leave Key on <strong>C</strong>, Scale on <strong>Major (happy)</strong>.</li>\n<li>Look at the keyboard: some keys are bright, some are dimmed. <strong>The bright keys are \"in the key\" — they sound at home together.</strong> The dimmed ones can clash.</li>\n<li>The green-outlined key with a dot is the <strong>root</strong> — the \"home base\" note. In C Major that's C.</li>\n</ol>\n<p>Rule of thumb for now: <strong>stay on bright keys and you can't really go wrong.</strong> Later you'll break that on purpose.</p>\n<blockquote><strong>Beginner shortcut:</strong> switch Scale to <strong>Minor Pentatonic</strong>. Only five keys stay lit, and <em>any</em> order of them sounds good. It's the training-wheels scale — great for a first melody.</blockquote>\n<p><strong>You learned:</strong> a scale is a small set of notes that belong together. The app shows you which ones. Home base is the root.</p>\n<hr>","ref":false},{"n":4,"v":"Vol 1 · Foundations","t":"Your first bassline","tm":"20 min","h":"<p>The bass connects the drums to the melody. It's low, simple, and usually locks to the kick.</p>\n<ol>\n<li>Pick a bass sound: <strong>Synth</strong> tab → target <strong>Bass</strong> → try the <strong>808 Sub Bass</strong> or <strong>Synth Bass</strong> preset. Press <strong>Load</strong>.</li>\n<li>Back on <strong>Song</strong>, the golden rule of beginner bass: <strong>put a bass note wherever the kick hits.</strong> Your kick is on 00 and 04 — select those Bass cells.</li>\n<li>For your first bassline, play the <strong>root</strong> on both. In C Major, that's <strong>C</strong> (use a low octave — hit <strong>Lower</strong> so you're around C3). Select Bass row 00 → tap <strong>C</strong>. Row 04 → tap <strong>C</strong>.</li>\n<li>Play. The bass and kick now move as one. That \"locked\" feeling is the foundation of groove.</li>\n</ol>\n<p>Make it musical:</p>\n<ol>\n<li>Change the row 04 bass note to a different <strong>bright</strong> key — try <strong>G</strong> or <strong>A</strong>. Two-note basslines carry a lot of songs.</li>\n<li>Add bass notes on rows 08 and 0C too. Keep them on bright keys. A four-note bassline (C – G – A – F is a classic) already sounds like a song.</li>\n</ol>\n<p><strong>Watch the grid:</strong> if a bass note shows a small <strong>amber dot</strong>, that note is <em>off-key</em> for your current scale. Not forbidden — but if something sounds wrong, that dot is the first place to look.</p>\n<p><strong>You learned:</strong> bass locks to the kick and lives on the low, in-key notes. Root notes are the safe, strong choice.</p>\n<hr>","ref":false},{"n":5,"v":"Vol 1 · Foundations","t":"Your first melody","tm":"25 min","h":"<p>The lead is the part people hum. It's higher than the bass and has more movement.</p>\n<ol>\n<li><strong>Synth</strong> tab → target <strong>Lead</strong> → load a clear sound like <strong>Square Lead</strong>, <strong>Sawtooth Lead</strong>, or <strong>8-Bit Chiptune</strong>.</li>\n<li>Melodies breathe — they are <strong>not</strong> on every step. Leave gaps. Silence is part of the tune.</li>\n<li>Start simple: put lead notes only on the main beats (00, 04, 08, 0C), all on <strong>bright</strong> keys, around octave 4 or 5 (use <strong>Higher</strong>).</li>\n<li>Play with the drums and bass under it. Congratulations — that's a complete piece of music.</li>\n</ol>\n<p>Make it sing:</p>\n<ol>\n<li><strong>Steps, not leaps.</strong> Moving to a neighboring bright key (C→D→E) sounds smooth; big jumps sound dramatic. Mix mostly steps with the occasional jump.</li>\n<li><strong>Start and end on home.</strong> Try ending your 16 steps landing back on the root (C). Notice how \"resolved\" it feels — like a sentence ending in a period.</li>\n<li>Add a couple of off-beat notes (odd rows) for surprise. Use the <strong>Note off</strong> button (the drawer's \"hold release\") to cut a long note short where you want a gap.</li>\n</ol>\n<p><strong>You learned:</strong> melody = movement + space. Steps are smooth, jumps are bold, and returning to the root feels like home.</p>\n<hr>","ref":false},{"n":6,"v":"Vol 1 · Foundations","t":"Shape the sound","tm":"20 min","h":"<p>Same notes, totally different vibe — that's the synth's job. Work on the <strong>Lead</strong> so you can hear it clearly.</p>\n<p>Play your loop, then move <strong>one</strong> slider at a time and <em>listen</em>:</p>\n<ul>\n<li><strong>Waveform</strong> — the raw tone. <em>Sine</em> = soft/pure, <em>Square</em> = hollow/retro, <em>Saw</em> = bright/buzzy, <em>Triangle</em> = mellow. This is the biggest change.</li>\n<li><strong>Attack</strong> — how fast the note arrives. Low = instant/plucky. High = slow swell (turn it up for a dreamy pad).</li>\n<li><strong>Release</strong> — how long it rings after. Short = tight. Long = smeary tails.</li>\n<li><strong>Cutoff (brightness)</strong> — dark and muffled on the left, bright and open on the right. Sweep it while playing; this is <em>the</em> classic synth move.</li>\n<li><strong>Wobble (LFO)</strong> — adds motion. Small depth = gentle shimmer. Big depth + medium rate = the dubstep \"wob.\"</li>\n</ul>\n<p>Then:</p>\n<ul>\n<li>Turn on <strong>Echo (Delay)</strong> and raise <strong>Mix</strong>. Great on a sparse lead — it fills space with repeats.</li>\n<li>Compare loading a preset (e.g. <strong>Dream Pad</strong> vs <strong>Acid Bass</strong>) and reading the sliders it set. Presets are recipes; now you can read the recipe.</li>\n</ul>\n<p><strong>You learned:</strong> a note's <em>character</em> comes from waveform + envelope + filter. Small moves = big changes.</p>\n<hr>","ref":false},{"n":7,"v":"Vol 1 · Foundations","t":"Timing and feel","tm":"15 min","h":"<ol>\n<li>Turn on <strong>Click</strong> (the metronome). Now every beat ticks. Play and <em>tap your foot</em> with the downbeat (the louder tick on row 00).</li>\n<li>Turn on <strong>Count-in</strong>. Press play — you get \"4, 3, 2, 1\" before it starts. Use this when you want to be ready to hear or perform along.</li>\n<li>Experiment with <strong>Tempo</strong>: the same pattern at 90 feels lazy, at 140 feels urgent. Tempo is an instrument too.</li>\n</ol>\n<p><strong>You learned:</strong> the beat is a grid you can feel. The metronome trains your internal clock.</p>\n<hr>","ref":false},{"n":8,"v":"Vol 1 · Foundations","t":"Build a song from patterns","tm":"25 min","h":"<p>One 16-step loop is a <em>section</em>. Songs are sections in sequence.</p>\n<ol>\n<li>You have <strong>4 patterns</strong> (the Pattern button cycles 1→2→3→4).</li>\n<li>Make <strong>Pattern 1</strong> your main groove (drums + bass + lead).</li>\n<li>Switch to <strong>Pattern 2</strong>. Build a <em>variation</em>: same bass, but a different melody, or a busier drum fill. Tip: <strong>Copy pattern</strong> in Pattern 1, paste into Pattern 2, then change just a few cells.</li>\n<li>Make <strong>Pattern 3</strong> a \"breakdown\" — drop the drums, leave bass + lead, so it feels quieter.</li>\n<li>Set the loop mode to <strong>All patterns</strong> (the Loop button). Press play — it now plays 1→2→3→4 and repeats. That arc (groove → variation → breakdown → back) is song structure.</li>\n<li><strong>Save</strong> when you like it.</li>\n</ol>\n<p><strong>You learned:</strong> copy-vary-arrange. Contrast between sections is what makes a song go somewhere.</p>\n<hr>","ref":false},{"n":9,"v":"Vol 2 · Beyond Basics","t":"Chords, faked with one melody line","tm":"25 min","h":"<p>You have one Lead track, not three — so you can't hold three notes at once. But you can <em>imply</em> a chord by playing its notes quickly one after another. This is called an <strong>arpeggio</strong>, and it's everywhere in music.</p>\n<p><strong>What a chord is:</strong> three notes from your scale, stacked. The easiest is the <strong>triad</strong> — root, skip one, skip one. In C Major: <strong>C – E – G</strong>. That's a C chord.</p>\n<ol>\n<ul><li>Key = C Major. On the <strong>Lead</strong> track, place: row 00 = <strong>C</strong>, row 01 = <strong>E</strong>, row 02 = <strong>G</strong>, row 03 = <strong>C</strong> (higher octave).</li>\n<li>Play. Fast enough, your ear hears it as one warm chord, not four notes.</li>\n<li>Now the trick that sounds pro: keep that C-E-G shape but <strong>slide it</strong> to start on other scale notes.</li>\n</ul></ol>\n<ul><li>Rows 04–07: start on <strong>F</strong> → F–A–C (an F chord)</li>\n<li>Rows 08–0B: start on <strong>G</strong> → G–B–D (a G chord)</li>\n<li>Rows 0C–0F: back to <strong>C</strong> → C–E–G</li>\n</ul><p>You just played <strong>C – F – G – C</strong>, one of the most common chord progressions in all of pop. Put your Lesson-4 bass roots under each change (C, F, G, C) and it locks together.</p>\n<p><strong>You learned:</strong> a chord is a stack of every-other scale note; arpeggios fake chords on a single track; moving the same shape gives you a progression.</p>","ref":false},{"n":10,"v":"Vol 2 · Beyond Basics","t":"Progressions that carry a song","tm":"20 min","h":"<p>A <strong>progression</strong> is the sequence of chords a song loops. The bass plays the chord's root; the lead arpeggiates or melodizes over it. Try these — each is four chords, one per group of 4 rows. Set your bass to the <strong>root</strong> of each.</p>\n<ul>\n<li><strong>The \"sad but pretty\" (Minor):</strong> switch Scale to <strong>Minor</strong>. Roots: <strong>A – F – C – G</strong> (Am–F–C–G). Millions of songs.</li>\n<li><strong>The \"50s classic\":</strong> C – A – F – G (root motion C, A, F, G).</li>\n<li><strong>The \"epic build\":</strong> C – G – A – F. Feels like it's rising even when it isn't.</li>\n</ul>\n<p>For each: put the bass root on the downbeat of each 4-row group, then noodle a lead melody using only <strong>bright (in-key)</strong> notes over the top. The chords do the emotional work; your melody just rides them.</p>\n<p><strong>You learned:</strong> the bass defines the chord, the progression defines the mood, and a simple melody over good chords sounds better than a fancy melody over none.</p>","ref":false},{"n":11,"v":"Vol 2 · Beyond Basics","t":"Rhythm that grooves, not marches","tm":"20 min","h":"<p>Notes on every beat sound stiff. <strong>Syncopation</strong> — putting notes <em>between</em> the beats — is what makes music feel human and funky.</p>\n<ol>\n<li>Take a plain bassline: roots on 00, 04, 08, 0C. Sounds like a march.</li>\n<li>Move some of them <strong>off</strong> the beat: try root on 00, then <strong>03</strong>, then <strong>08</strong>, then <strong>0B</strong>. Same notes, suddenly it bounces.</li>\n<li>On drums, add a kick on an <em>off</em> row (like <strong>07</strong> or <strong>0E</strong>). That \"extra\" kick where you don't expect it is the secret of funk, house, and hip-hop.</li>\n<li><strong>Ghost notes:</strong> add very sparse hi-hats on odd rows between your main hats. They fill without cluttering.</li>\n</ol>\n<p><strong>The \"leave a hole\" rule:</strong> the most powerful move in rhythm is <em>silence</em> on a beat you'd expect to be filled. Delete a note where the ear expects one and the groove breathes.</p>\n<p><strong>You learned:</strong> off-beat placement creates groove; a missing note can hit harder than an added one.</p>","ref":false},{"n":12,"v":"Vol 2 · Beyond Basics","t":"Tension and release","tm":"15 min","h":"<p>Music feels good because it leaves \"home\" and comes back. You've felt this — ending on the root feels resolved. Now use it on purpose.</p>\n<ul>\n<li><strong>Away and back:</strong> build a melody that wanders to a far, tense note (a bright note <em>not</em> the root, like the 7th — B in C Major) and only resolves to C at the very end of the loop. The delay makes the landing satisfying.</li>\n<li><strong>The off-key passing note:</strong> deliberately place ONE dimmed (off-key) note <em>between</em> two in-key notes, on a fast step. It sounds spicy in passing but wrong if you land on it. This is a \"blue note\" — the amber dot is warning you correctly, and you're overriding it on purpose.</li>\n<li><strong>Drop and lift:</strong> in one pattern, strip everything to just bass (tension); in the next, slam the full drums back in (release).</li>\n</ul>\n<p><strong>You learned:</strong> tension is distance from home; release is the return. Off-key notes work <em>in motion</em>, not at rest.</p>\n<hr>","ref":false},{"n":13,"v":"Vol 2 · Beyond Basics","t":"Hip-Hop / Boom-Bap","tm":"20 min","h":"<p>Slow, heavy, head-nod music. <strong>Tempo ~85–95.</strong></p>\n<ul>\n<li><strong>Drums:</strong> KICK on 00 and 07 (that second kick is off-beat — crucial). SNARE on 04 and 0C. HAT on every even row; make 00 a <strong>KICK+HAT</strong> and 04/0C <strong>SNARE+HAT</strong>.</li>\n<li><strong>Bass:</strong> deep sound (<strong>808 Sub Bass</strong>). Root on 00 and 07 to follow those kicks. Keep it low and sparse.</li>\n<li><strong>Lead:</strong> a short, moody 3–4 note phrase in <strong>Minor</strong> scale, lots of space. Load <strong>E-Piano</strong> or <strong>Harp</strong>.</li>\n<li><strong>Feel:</strong> laid-back. Don't fill every gap. The space <em>is</em> the style.</li>\n</ul>","ref":false},{"n":14,"v":"Vol 2 · Beyond Basics","t":"House / Four-on-the-Floor","tm":"20 min","h":"<p>Dance music. Steady, hypnotic, driving. <strong>Tempo ~120–128.</strong></p>\n<ul>\n<li><strong>Drums:</strong> KICK on <strong>every</strong> beat row — 00, 04, 08, 0C (that's \"four on the floor\"). SNARE (or clap) on 04 and 0C stacked with the kick using <strong>SNARE+HAT</strong>? No — keep snare separate: SNARE on 04, 0C. HAT on all the <strong>odd</strong> rows (01, 03, 05...) — the off-beat hat is the house signature.</li>\n<li><strong>Bass:</strong> a bouncy off-beat bassline. Put bass notes on the odd rows <em>between</em> kicks (01, 03, 05...). Use <strong>Synth Bass</strong> or <strong>Acid Bass</strong>, short Release so it's punchy.</li>\n<li><strong>Lead:</strong> a repeating stab — one chord arpeggio (Lesson 9) hit on the beats. <strong>Dream Pad</strong> for smooth, <strong>Saw Lead</strong> for energy.</li>\n<li><strong>Feel:</strong> relentless and even. Repetition is the point.</li>\n</ul>","ref":false},{"n":15,"v":"Vol 2 · Beyond Basics","t":"Chiptune / 8-Bit","tm":"20 min","h":"<p>Video-game music. Bright, bouncy, nostalgic. <strong>Tempo ~130–150.</strong></p>\n<ul>\n<li><strong>Sounds:</strong> Lead = <strong>8-Bit Chiptune</strong> or <strong>Square Lead</strong>. Bass = <strong>Square Lead</strong> in a low octave. This is the authentic NES palette.</li>\n<li><strong>Drums:</strong> chiptune often <em>fakes</em> drums with noise — but you have real ones. KICK on 00/08, SNARE on 04/0C, fast HATs. Keep it snappy.</li>\n<li><strong>Bass:</strong> fast and busy — an arpeggiated root-fifth pattern (C, then G, repeating) on lots of steps. Old consoles kept bass moving constantly.</li>\n<li><strong>Lead:</strong> a fast, happy <strong>Major</strong> melody with quick runs of stepping notes. Use short Attack and short Release for that \"blippy\" pluck.</li>\n<li><strong>Trick:</strong> long, fast arpeggios (Lesson 9) are the chiptune signature — they faked chords because the hardware only had a few voices, exactly like your single Lead track.</li>\n</ul>","ref":false},{"n":16,"v":"Vol 2 · Beyond Basics","t":"Ambient / Cinematic","tm":"20 min","h":"<p>Slow, spacious, emotional. Almost no drums. <strong>Tempo ~70–90.</strong></p>\n<ul>\n<li><strong>Sounds:</strong> Lead = <strong>Dream Pad</strong> or <strong>Dark Pad</strong> with <strong>long Attack</strong> (slow swell) and <strong>long Release</strong> (long tails). Turn <strong>Echo</strong> on with high Mix.</li>\n<li><strong>Bass:</strong> one low root note held for a whole pattern. Change it once per pattern to shift the mood.</li>\n<li><strong>Lead:</strong> very few notes — 2 or 3 across all 16 steps, all in-key, lots of silence. Let the echo fill the gaps.</li>\n<li><strong>Drums:</strong> none, or a single soft HAT every 4 rows. Restraint is everything.</li>\n<li><strong>Feel:</strong> if it sounds \"too empty,\" you're probably close. Remove more.</li>\n</ul>\n<hr>","ref":false},{"n":17,"v":"Vol 2 · Beyond Basics","t":"Getting big sound from three tracks","tm":"25 min","h":"<p>You have Bass, Lead, Drum. Here's how to make three feel like a full band.</p>\n<ul>\n<li><strong>Octave layering the illusion of two leads:</strong> write your melody, then in the next pattern copy it and shift key notes up an octave (<strong>Higher</strong>). Alternating patterns makes one line feel like it has range.</li>\n<li><strong>Call and response:</strong> let the Lead play a phrase in the first 8 rows, then go <em>silent</em> while a drum fill answers in the last 8. Two \"instruments\" trading, using one track and time.</li>\n<li><strong>Bass doubling as melody:</strong> in a sparse section, let the bass play an actual tune (not just roots) while the lead rests. Now the low end carries the song.</li>\n<li><strong>The combo pads as texture:</strong> KICK+HAT and SNARE+HAT don't just save a row — they thicken the hit. Use them on the main beats and plain HAT on the in-betweens so the downbeats feel heavier.</li>\n</ul>","ref":false},{"n":18,"v":"Vol 2 · Beyond Basics","t":"Sound design recipes","tm":"25 min","h":"<p>Presets are starting points. Here's how to <em>build</em> a sound from the sliders (Lesson 6 taught what each does — now combine them).</p>\n<ul>\n<li><strong>A punchy pluck:</strong> Saw or Square wave · Attack all the way down · short Decay · Sustain near 0 · short Release. Great for bass and stabs.</li>\n<li><strong>A slow pad:</strong> Sine or Triangle · long Attack · high Sustain · long Release · Cutoff low-ish for warmth. Turn on a slow, shallow LFO for life.</li>\n<li><strong>A screaming lead:</strong> Saw wave · Cutoff high · a touch of LFO depth · medium Release. Add Echo.</li>\n<li><strong>A wobble bass:</strong> Triangle or Saw · low Cutoff · <strong>high LFO depth</strong>, medium-low LFO rate. That's the \"wub.\"</li>\n<li><strong>The filter sweep (do this live):</strong> set Cutoff low, press play, and slowly drag Cutoff up over a few loops. The track \"opens up.\" It's the most-used move in electronic music and you can perform it by hand.</li>\n</ul>\n<p><strong>Habit:</strong> when you find a sound you love, note the five slider positions somewhere. That's your personal preset.</p>","ref":false},{"n":19,"v":"Vol 2 · Beyond Basics","t":"Arranging a full track","tm":"30 min","h":"<p>Four patterns is enough for a real song if you use them as <em>sections</em>. A classic pop arrangement, mapped to your 4 patterns and All-patterns loop mode:</p>\n<ol>\n<li><strong>Pattern 1 — Intro/Verse:</strong> bass + lead, light drums. Establishes the mood.</li>\n<li><strong>Pattern 2 — Chorus:</strong> full drums (combos on the beats), bass locked to kick, the \"big\" version of your melody. This should feel like a lift from Pattern 1 — that contrast is the payoff.</li>\n<li><strong>Pattern 3 — Variation:</strong> the chorus groove but change <em>one</em> thing — a new melody, a busier bass, a drum fill. Keeps the ear interested.</li>\n<li><strong>Pattern 4 — Breakdown:</strong> strip it back — drop drums, leave bass + a lonely lead. Builds anticipation before it loops back to the full Pattern 2.</li>\n</ol>\n<p><strong>The rule of contrast:</strong> every section should differ from its neighbor in <em>density</em> (how full it is). Full → sparse → full is what makes a song feel like it's going somewhere. Save often.</p>","ref":false},{"n":20,"v":"Vol 2 · Beyond Basics","t":"Develop your ear","tm":"","h":"<p>The real skill isn't the app — it's hearing. Small daily habits:</p>\n<ul>\n<li><strong>Steal one bar.</strong> Pick a song you love, find its main beat, and recreate just the kick/snare/hat pattern by ear. You'll be shocked how simple most are.</li>\n<li><strong>Name what you hear.</strong> When something moves you, ask: is it the bass? the chord change? the space? Naming it lets you reuse it.</li>\n<li><strong>Copy, then mutate.</strong> Rebuild a groove you like, then change one thing at a time until it's yours.</li>\n<li><strong>Finish things.</strong> A finished 30-second loop teaches more than ten abandoned ideas. Save it, come back, improve it.</li>\n<li><strong>Constraints breed creativity.</strong> Three tracks and 16 steps isn't a limitation — it's the same box that made chiptune classics. Master the box before wishing for a bigger one.</li>\n</ul>\n<hr>","ref":false},{"n":21,"v":"Vol 3 · Building Blocks","t":"The \"Four Chords\"","tm":"25 min","h":"<p>This is <em>the</em> one. More famous singalong songs use this exact progression than any other. In C Major the roots are: <strong>C – G – A – F</strong>.</p>\n<ol>\n<ul><li>Key = <strong>C Major</strong>. Bass roots, one per 4-row group: <strong>C</strong> (00) · <strong>G</strong> (04) · <strong>A</strong> (08) · <strong>F</strong> (0C). Low octave.</li>\n<li>Over each, arpeggiate the triad on the Lead:</li>\n</ul></ol>\n<ul><li>C group → C–E–G</li>\n<li>G group → G–B–D</li>\n<li>A group → A–C–E</li>\n<li>F group → F–A–C</li>\n</ul><ol>\n<ul><li>Play it looping. That feeling of \"I've heard this before\"? You have — a thousand times. That's the point.</li>\n</ul></ol>\n<p><strong>Why it works:</strong> it starts at home (I=C), lifts (V=G), turns bittersweet (vi=Am, the sad minor chord), then gently resolves (IV=F) and loops. Emotional round-trip in four chords.</p>\n<p><strong>Variations that also power hits:</strong></p>\n<ul><li>Start on the sad chord: <strong>A – F – C – G</strong> (vi–IV–I–V) — same four chords, moodier because it opens on the minor.</li>\n<li><strong>C – F – G – F</strong> — brighter, more \"rock.\"</li>\n</ul>","ref":false},{"n":22,"v":"Vol 3 · Building Blocks","t":"The Sad/Emotional progressions","tm":"20 min","h":"<p>Switch Scale to <strong>Minor</strong> and the same idea turns cinematic.</p>\n<ul>\n<li><strong>Am–F–C–G</strong> (roots A–F–C–G): the \"epic sad\" loop under countless ballads and film trailers.</li>\n<li><strong>Am–G–F–E</strong> (roots A–G–F–E): a <em>descending</em> bassline — each root steps down. Descending progressions feel like sinking, falling, longing. Enormously common in emotional music.</li>\n<li><strong>The lament (descending bass):</strong> put bass roots that walk straight down the scale — A, G, F, E over four groups — and hold simple lead notes above. The downward pull does all the emotional work.</li>\n</ul>\n<p><strong>You learned:</strong> minor + descending motion = melancholy. It's a <em>mechanism</em>, not a mystery.</p>","ref":false},{"n":23,"v":"Vol 3 · Building Blocks","t":"The Blues / Rock progression","tm":"20 min","h":"<p>The <strong>12-bar blues</strong> is the ancestor of rock, R&amp;B, and a lot of pop. Simplified to fit your loop, it's built on three chords: <strong>I, IV, V</strong> — in C that's <strong>C, F, G</strong>.</p>\n<ul>\n<li>Bass pattern across the loop: <strong>C</strong> (rows 00–07), <strong>F</strong> (08–0B), <strong>C</strong> (0C–0F) — or cycle C-C-F-C for a punchier feel.</li>\n<li><strong>The signature move:</strong> don't just hold the root — play a <strong>root-and-up</strong> bounce. On the C section alternate C and the note two scale-steps up, back and forth on the beat. That \"C… up… C… up…\" shuffle <em>is</em> the blues bass.</li>\n<li>Use the <strong>Blues</strong> scale in the picker for your lead — it adds the \"blue note\" that gives blues and rock their grit.</li>\n</ul>\n<p><strong>You learned:</strong> three chords + a bouncing bass + the blues scale = the foundation rock was built on.</p>\n<hr>","ref":false},{"n":24,"v":"Vol 3 · Building Blocks","t":"The driving rock riff","tm":"20 min","h":"<p>The engine of hard rock and metal: a <strong>repeated root note with rhythmic push</strong>, punctuated by a move to a nearby note.</p>\n<ol>\n<li>Pick a low, aggressive Bass sound (<strong>Acid Bass</strong> or <strong>Synth Bass</strong>, short Release).</li>\n<li>Hammer the <strong>root</strong> in a syncopated rhythm — e.g. rows 00, 02, 03, 06, 08, 0B. The gaps and repeats create the <em>drive</em>; a straight run of notes wouldn't.</li>\n<li>Every few reps, jump to a nearby in-key note (up to the 4th or 5th) and back. That tension-and-return is the riff's \"hook.\"</li>\n<li>Double it on the Lead an octave up for power.</li>\n</ol>\n<p><strong>The principle:</strong> rock riffs are mostly <em>rhythm on one note</em>, with just enough pitch movement to stay interesting. Groove first, notes second.</p>","ref":false},{"n":25,"v":"Vol 3 · Building Blocks","t":"The walking bassline","tm":"20 min","h":"<p>The smooth, strolling bass of jazz, blues, and soul. Instead of sitting on the root, the bass <strong>walks</strong> — a steady stream of notes that connect one chord to the next.</p>\n<ol>\n<li>One bass note per beat row (00, 04, 08, 0C) at minimum — walking bass is <em>constant</em>.</li>\n<li>Between chord roots, step through in-key notes to connect them. Going from a C chord to an F chord? Walk C → D → E → F, one per step. You <em>arrive</em> at the next root right as the chord changes.</li>\n<li>Keep it almost entirely on <strong>bright (in-key)</strong> notes, with the occasional off-key passing note (Lesson 12) for that jazzy slink.</li>\n</ol>\n<p><strong>The principle:</strong> a walking bass is a melody in the low end that always lands on the chord root when the chord changes. Motion between, arrival on the beat.</p>","ref":false},{"n":26,"v":"Vol 3 · Building Blocks","t":"The arpeggio hook","tm":"20 min","h":"<p>Many famous \"melodic\" hooks aren't melodies at all — they're <strong>arpeggios</strong> (broken chords) played fast, the notes sparkling up and down.</p>\n<ol>\n<li>Take any triad (C–E–G). Play it up <em>and</em> back down across the steps: C–E–G–E–C–E–G–E...</li>\n<li>Speed and repetition turn it into a shimmering hook. This is the backbone of a huge amount of electronic, pop, and video-game music.</li>\n<li>Move the shape to follow a progression (Lesson 21) and the same arpeggio becomes a whole song's worth of hook.</li>\n<li>Try it on a bright <strong>Saw Lead</strong> or <strong>8-Bit Chiptune</strong> with a bit of <strong>Echo</strong>.</li>\n</ol>\n<p><strong>The principle:</strong> you don't need a clever tune — a chord played as a fast up-and-down pattern <em>is</em> a hook. Chiptune, trance, and pop live on this.</p>","ref":false},{"n":27,"v":"Vol 3 · Building Blocks","t":"The vocal-style lead","tm":"20 min","h":"<p>Instrumental \"lead\" lines that stick in your head usually mimic how a <strong>voice</strong> sings: short phrases, breaths (gaps), and notes that mostly step rather than leap.</p>\n<ol>\n<li>Write a 4–6 note phrase in the first 8 rows, then <strong>rest</strong> (silence) for a couple of rows — that's the \"breath.\"</li>\n<li>Answer it with a related phrase in the back half — maybe the same shape ending on a different note. This is <strong>call-and-response</strong>, how melodies converse.</li>\n<li>Keep motion mostly <strong>stepwise</strong> (neighbor notes), with one expressive leap for drama. Land the phrase on the root to \"finish the sentence.\"</li>\n<li>A slower Attack and some Release make it \"sing\" rather than \"blip.\"</li>\n</ol>\n<p><strong>The principle:</strong> the catchiest leads breathe like a singer. Phrase, breath, answer, resolve.</p>\n<hr>","ref":false},{"n":28,"v":"Vol 3 · Building Blocks","t":"The four named beats every producer knows","tm":"30 min","h":"<p><strong>1. Boom-Bap (hip-hop):</strong> ~90 bpm.</p>\n<ul>\n<li>KICK on 00 and 07 · SNARE on 04 and 0C · steady HAT on even rows.</li>\n<li>The off-beat kick on 07 is what makes heads nod. Swing it late for extra flavor.</li>\n</ul>\n<p><strong>2. Four-on-the-Floor (house/disco/pop):</strong> ~124 bpm.</p>\n<ul>\n<li>KICK on <strong>every</strong> beat row (00, 04, 08, 0C) · clap/SNARE on 04 and 0C · <strong>off-beat HATs</strong> on the odd rows.</li>\n<li>The steady kick is hypnotic; the off-beat hat gives it lift.</li>\n</ul>\n<p><strong>3. The Backbeat (rock/pop):</strong> any tempo.</p>\n<ul>\n<li>KICK on 00 (and maybe 08) · SNARE hard on 04 and 0C · HAT on every even row.</li>\n<li>The whole feel lives in that snare on 2 and 4 — the \"backbeat\" you clap along to at concerts.</li>\n</ul>\n<p><strong>4. Dembow (reggaeton/latin pop):</strong> ~95 bpm.</p>\n<ul>\n<li>KICK on 00 and 08 · SNARE on 03, 06, 0B, 0E (the \"boom-ch-boom-chick\" pattern) · HAT filling around it.</li>\n<li>That snare placement is the entire signature of modern latin pop.</li>\n</ul>\n<p><strong>Try:</strong> build all four with the same tempo and sounds, back to back in patterns 1–4, and hear how <em>only the rhythm</em> changes the genre completely.</p>","ref":false},{"n":29,"v":"Vol 3 · Building Blocks","t":"The fill and the drop","tm":"20 min","h":"<p>Two moves that make a beat feel like a <em>production</em>, not a loop.</p>\n<ul>\n<li><strong>The fill:</strong> in the last 2–4 rows of a pattern, break the groove — a fast run of snares (SNARE on 0C, 0D, 0E, 0F) or alternating kick/snare. It signals \"here comes a change\" and launches the next section.</li>\n<li><strong>The drop:</strong> arrange it so a busy pattern is followed by a moment of near-silence, then the full beat slams back. Cut to just bass for a pattern (the \"tension\"), then hit the full drums+combos (the \"release\"). This is the single most powerful arrangement move in modern music.</li>\n<li><strong>The build:</strong> across a pattern, add more hi-hats each time it loops (or raise the Cutoff sweep, Lesson 18) so energy <em>rises</em> into the drop.</li>\n</ul>\n<p><strong>You learned:</strong> fills announce change; drops deliver it; builds create the anticipation that makes a drop land.</p>\n<hr>","ref":false},{"n":30,"v":"Vol 3 · Building Blocks","t":"Iconic sound recipes","tm":"25 min","h":"<ul>\n<li><strong>The 808 sub-bass (trap/hip-hop):</strong> Sine wave · low Cutoff · long-ish Decay/Release · Sustain low. Deep, round, felt-more-than-heard. Play it <em>low</em>.</li>\n<li><strong>The supersaw festival lead (EDM):</strong> Saw wave · Cutoff high · medium Release · a touch of LFO · <strong>Echo on</strong>. Big, bright, euphoric. Play chords as fast arpeggios.</li>\n<li><strong>The lo-fi piano (chill/study beats):</strong> Triangle or Sine · soft Attack · medium Release · Cutoff rolled back for that \"warm, dusty\" muffle. Keep it gentle and a little sad (Minor scale).</li>\n<li><strong>The acid squelch (techno):</strong> Saw wave · <strong>sweep the Cutoff live</strong> while an LFO wobbles · short Release. The moving filter <em>is</em> the sound.</li>\n<li><strong>The pluck (pop/tropical):</strong> Square or Saw · Attack at zero · very short Decay · Sustain near zero. Snappy and percussive — great for bouncy melodies.</li>\n<li><strong>The warm pad (ballads/ambient):</strong> Sine/Triangle · long Attack · high Sustain · long Release · gentle LFO. Fills the background with emotion.</li>\n</ul>\n<p><strong>Habit:</strong> when you nail a sound, write down its six slider positions. That's your custom preset — the pros keep libraries of exactly these.</p>\n<hr>","ref":false},{"n":31,"v":"Vol 3 · Building Blocks","t":"Put it together: reverse-engineer by ear","tm":"","h":"<p>Now you have the vocabulary. Here's how to figure out a song you love — legally and educationally, for your own learning:</p>\n<ol>\n<li><strong>Find the tempo.</strong> Tap your foot to the song, match it with the app's tempo until they lock.</li>\n<li><strong>Get the drum groove.</strong> Which named beat (Lesson 28) is it closest to? Start there, adjust by ear.</li>\n<li><strong>Find the root.</strong> Hum the bass. Hunt for its home note on the keyboard — that's your key. Set the scale helper to match (major if bright, minor if moody).</li>\n<li><strong>Trace the progression.</strong> Does it feel like the Four Chords? A descending lament? Test the common ones from Part A against what you hear.</li>\n<li><strong>Catch the hook's shape.</strong> Is it a riff on one note, an arpeggio, or a vocal-style phrase? You know all three now.</li>\n<li><strong>Rebuild it in your own way.</strong> Don't copy note-for-note — capture the <em>feel</em> with your own notes. You'll learn ten times more, and what you make is yours.</li>\n</ol>\n<p><strong>The truth about famous music:</strong> almost none of it is complicated. It's a handful of these building blocks, arranged with taste and confidence. You now have the blocks. The rest is play.</p>\n<hr>","ref":false},{"n":32,"v":"Vol 4 · Sound & Emotion","t":"Why your track sounds \"muddy\"","tm":"20 min","h":"<p>Muddiness = too much happening in the same frequency range at the same time. The fix is <em>separation</em>. Play one of your finished loops and listen for these problems:</p>\n<ul>\n<li><strong>Bass and lead colliding.</strong> If your bass is high and your lead is low, they blur into each other. Fix: keep <strong>bass low</strong> (octave 2–3, use <em>Lower</em>) and <strong>lead high</strong> (octave 4–5, use <em>Higher</em>). Put real distance between them. This one change fixes most mud.</li>\n<li><strong>Everything playing at once, always.</strong> If all three tracks hit every beat, nothing stands out. Fix: let them take turns. When the lead is busy, thin the drums. When the bass walks, simplify the lead.</li>\n<li><strong>Too-bright sounds stacking.</strong> Three buzzy saw sounds together = harsh noise. Fix: vary the waveforms — a sine bass under a saw lead reads clearly; two saws don't.</li>\n</ul>\n<p><strong>The test:</strong> can you hum each of the three parts back separately after one listen? If yes, it's clean. If they blur, something needs to move.</p>","ref":false},{"n":33,"v":"Vol 4 · Sound & Emotion","t":"Using the filter to carve space","tm":"20 min","h":"<p>The <strong>Cutoff</strong> slider isn't just \"brightness\" — it's your main mixing tool. It decides how much space a sound takes up.</p>\n<ol>\n<li>On the <strong>Bass</strong>, roll the Cutoff <em>down</em> (darker). Bass doesn't need brightness — it needs to sit low and stay out of the lead's way. A dark bass leaves room up top.</li>\n<li>On the <strong>Lead</strong>, keep the Cutoff <em>up</em> (brighter) so it cuts through and grabs attention. The lead is the star; let it shine on top.</li>\n<li>Now they occupy different spaces — low-and-dark vs. high-and-bright — and both are clearly audible.</li>\n</ol>\n<p><strong>The principle:</strong> dark sounds sink to the bottom, bright sounds float to the top. Use Cutoff to <em>assign each track a floor in the building</em> so they're not stacked in one room.</p>","ref":false},{"n":34,"v":"Vol 4 · Sound & Emotion","t":"When NOT to add things","tm":"15 min","h":"<p>Beginners add. Producers subtract. The most common mistake is a track that's <em>too full</em>.</p>\n<ul>\n<li><strong>The mute test:</strong> play your loop and mentally remove one track. If it sounds <em>better</em> or <em>clearer</em> without it in a section — leave it out there. Silence from one track is space for another.</li>\n<li><strong>The \"one star\" rule:</strong> in any given moment, one track should be the focus. If the bass is doing something cool, the lead should get out of its way, not compete.</li>\n<li><strong>Density over time:</strong> a track that's full the whole way through is exhausting and flat. The ear needs contrast (Volume 2, Lesson 19). Empty sections make full sections hit harder.</li>\n</ul>\n<p><strong>The principle:</strong> every sound you add costs clarity. Add only what earns its place. When in doubt, take something <em>out</em>.</p>","ref":false},{"n":35,"v":"Vol 4 · Sound & Emotion","t":"Depth with echo and dynamics","tm":"20 min","h":"<p>Flat tracks have everything at the same \"distance.\" Real tracks have foreground and background — depth.</p>\n<ul>\n<li><strong>Echo = distance.</strong> A sound with lots of Echo (high Mix) feels <em>far away</em> and spacious; a dry sound feels <em>close and present</em>. Put Echo on the lead to place it in a big room; keep the bass and kick dry so they stay up front and punchy. Never drown the kick in echo — it needs to be tight.</li>\n<li><strong>Loud and soft matter.</strong> If every note is the same intensity, it's robotic. Your ADSR <strong>Attack</strong> and <strong>Sustain</strong> control this — a mix of punchy short notes and softer sustained ones creates life. (Even just alternating notes and rests, Volume 2 Lesson 11, does this.)</li>\n<li><strong>Space around the important note.</strong> The note right before a big moment should have <em>room</em> — a beat of silence before the drop makes the drop enormous.</li>\n</ul>\n<p><strong>The principle:</strong> depth comes from contrast — near vs. far (echo), loud vs. soft, busy vs. still.</p>","ref":false},{"n":36,"v":"Vol 4 · Sound & Emotion","t":"When is it done?","tm":"15 min","h":"<p>The hardest question. Beginners either quit too early (a bare loop) or fiddle forever. Here's how to know.</p>\n<p><strong>It's NOT done if:</strong></p>\n<ul>\n<li>It's a single 16-step loop with no variation — that's a sketch, not a song. Give it at least a second section.</li>\n<li>Two tracks are fighting and you can't hear one clearly — fix the mix first.</li>\n<li>You're bored 8 seconds in — it needs contrast, a fill, or a drop.</li>\n</ul>\n<p><strong>It IS done when:</strong></p>\n<ul>\n<li>It has at least two sections that <em>contrast</em> (full vs. sparse).</li>\n<li>You can hear all three parts clearly.</li>\n<li>It has a beginning (something establishes) and some kind of arc (it goes somewhere and comes back).</li>\n<li>You've listened three times and only want to change tiny things — that's the \"good enough to finish\" signal. Chasing perfect kills more tracks than any other habit.</li>\n</ul>\n<p><strong>The rule that matters most:</strong> <em>finish it.</em> A finished imperfect track teaches you more than a perfect unfinished one. Save it, name it, move on. Come back next week with fresh ears — you'll hear exactly what to improve, and you'll improve faster by finishing ten okay tracks than by polishing one forever.</p>\n<hr>","ref":false},{"n":37,"v":"Vol 4 · Sound & Emotion","t":"The emotional toolkit","tm":"20 min","h":"<p>You have direct control over mood. Here's the map — change one variable, change the feeling:</p>\n<ul>\n<li><strong>Major scale = bright, happy, resolved.</strong> Minor scale = sad, tense, serious. This is the biggest single lever. Same melody, flip the scale, opposite emotion.</li>\n<li><strong>Fast tempo = energy, urgency, joy or panic.</strong> Slow tempo = calm, sadness, weight.</li>\n<li><strong>High notes = light, hopeful, delicate.</strong> Low notes = dark, powerful, heavy.</li>\n<li><strong>Lots of space = calm, lonely, spacious.</strong> Densely packed notes = intense, anxious, exciting.</li>\n<li><strong>Consonance (in-key, resolved) = comfort.</strong> Dissonance (off-key, unresolved) = unease, longing.</li>\n</ul>\n<p><strong>Exercise:</strong> write one simple 8-note melody. Now make four versions — (1) major + fast + high, (2) minor + slow + low, (3) major + slow, (4) minor + fast. Same notes, four completely different emotions. <em>That's</em> composition.</p>","ref":false},{"n":38,"v":"Vol 4 · Sound & Emotion","t":"Writing a specific feeling on purpose","tm":"25 min","h":"<p>Don't wait for inspiration — engineer the emotion. Pick a target and build toward it:</p>\n<ul>\n<li><strong>\"Triumphant / heroic\":</strong> Major scale · medium-fast tempo · a lead that <em>rises</em> (notes climbing upward) · big brass or saw sound · strong four-on-the-floor or backbeat drums · land hard on the root. Rising motion = victory.</li>\n<li><strong>\"Sad / longing\":</strong> Minor scale · slow · a descending bassline (Lesson 22) · soft pad or piano sound · lots of space · a melody that reaches up but falls back down without fully resolving. Falling motion + unresolved = yearning.</li>\n<li><strong>\"Tense / scary\":</strong> Minor · off-key dissonant notes held uncomfortably · low rumbling bass · sparse, unpredictable drum hits · no comfortable resolution. Denying the ear \"home\" creates dread.</li>\n<li><strong>\"Peaceful / dreamy\":</strong> Major or pentatonic · slow · warm pad with long attack · heavy echo · very few notes, lots of silence · gentle, no sharp attacks. Softness everywhere.</li>\n</ul>\n<p><strong>The method:</strong> name the emotion first, then pull the right levers from Lesson 37. Working backward from a feeling is how film composers work.</p>","ref":false},{"n":39,"v":"Vol 4 · Sound & Emotion","t":"Tension and the emotional arc","tm":"25 min","h":"<p>A song isn't one emotion held flat — it's a <em>journey</em> between them. The magic is in the <em>change</em>.</p>\n<p>Think of your 4 patterns as a story with a shape:</p>\n<ol>\n<li><strong>Establish (Pattern 1):</strong> set the mood — calm, sparse. This is \"once upon a time.\" Don't give everything away.</li>\n<li><strong>Build (Pattern 2):</strong> add energy — more drums, busier bass, the melody grows. Tension rising.</li>\n<li><strong>Peak (Pattern 3):</strong> the emotional high point — fullest, loudest, most resolved <em>or</em> most intense. The payoff everything led to.</li>\n<li><strong>Release (Pattern 4):</strong> come down — strip back, breathe, resolve home. The \"ever after.\"</li>\n</ol>\n<p><strong>The single most powerful emotional move — the drop:</strong> right before your peak, cut almost everything to near-silence for a moment (just a lonely bass note or one held pad). Then slam the full arrangement in. That contrast — emptiness then fullness — is <em>the</em> thing that gives people chills. It works because you <em>denied</em> them energy, then delivered it. Tension, then release.</p>\n<p><strong>Exercise:</strong> take a finished loop and arrange it across 4 patterns as establish → build → peak → release, with a one-beat drop before the peak. Play it in All-Patterns mode. That's no longer a loop — it's a piece with a beginning, a climb, a summit, and a landing.</p>","ref":false},{"n":40,"v":"Vol 4 · Sound & Emotion","t":"Music for a scene or story","tm":"25 min","h":"<p><em>(This one's for you specifically — pairing music with games or stories.)</em></p>\n<p>Music tells the listener how to feel about what they're seeing. Practice writing to a <em>purpose</em>:</p>\n<ul>\n<li><strong>A peaceful village / hub:</strong> Major or pentatonic, medium-slow, warm and simple, loops gently without demanding attention. It should be pleasant to hear for the 100th time — restraint and repetition are features, not bugs.</li>\n<li><strong>A tense dungeon / danger:</strong> Minor, sparse, low, unpredictable. Leave lots of space so silence itself feels threatening. Less is scarier than more.</li>\n<li><strong>A boss fight / action:</strong> fast, driving drums (four-on-the-floor or a hard backbeat), aggressive saw bass riff (Lesson 24), an urgent minor lead. High energy, relentless, room for adrenaline.</li>\n<li><strong>A victory / reward:</strong> short, bright, major, rising, triumphant — a musical \"you did it!\" Land on the root, big and resolved.</li>\n<li><strong>An emotional cutscene:</strong> slow, minor, a simple vocal-style lead (Lesson 27) over a descending progression, heavy echo. Let it breathe.</li>\n</ul>\n<p><strong>The principle for functional music:</strong> it serves the moment, not the composer's ego. Background music that loops for hours needs to be <em>unobtrusive and repeatable</em>; a one-time emotional beat can be dramatic. Match the music's demands to how it'll be used.</p>\n<p><strong>Exercise:</strong> pick three \"scenes\" (a calm morning, a chase, a sad goodbye) and write a short loop for each. Play them for someone <em>without</em> saying which is which — if they can guess the scene, your music is telling the story.</p>\n<hr>","ref":false},{"n":null,"v":"★ Reference & Cheat Sheets","t":"Beginner rules (reference)","tm":"","h":"<p>These aren't laws. They're safe starting points you'll enjoy breaking later.</p>\n<ul>\n<li><strong>Kick = pulse, snare = backbeat, hat = energy.</strong> Kick on 00/04, snare on 08 is home base.</li>\n<li><strong>Bass follows the kick</strong> and lives on low, in-key notes — root notes are safest.</li>\n<li><strong>Melody needs space.</strong> Don't fill every step. Steps sound smooth, leaps sound bold.</li>\n<li><strong>End on the root</strong> to feel resolved.</li>\n<li><strong>Stay on the bright (in-key) keys</strong> until you can hear why an off-key note works.</li>\n<li><strong>An amber dot in the grid</strong> = that note is outside your key. A clue, not an error.</li>\n<li><strong>Change one thing at a time</strong> when shaping sound, so you learn what each control does.</li>\n<li><strong>Undo is free.</strong> Experiment like nothing can break — because nothing can.</li>\n</ul>","ref":true},{"n":null,"v":"★ Reference & Cheat Sheets","t":"20-min quick recipe","tm":"","h":"<p>For when you just want a track fast:</p>\n<ol>\n<li>Clear all. Key = C, Scale = Major (or Minor Pentatonic for safety).</li>\n<li>Drums: KICK+HAT on 00 and 04, SNARE+HAT on 08, HAT on the empty even rows.</li>\n<li>Bass: root note (C, low octave) on 00 and 04; try G on 08 and F on 0C.</li>\n<li>Lead: 4–6 notes on bright keys, mostly on beats, ending on C.</li>\n<li>Pick a Lead preset you like; nudge Cutoff and Release to taste.</li>\n<li>Turn on Click, set tempo to feel, press play. Save. Done.</li>\n</ol>","ref":true},{"n":null,"v":"★ Reference & Cheat Sheets","t":"Beyond Basics cheat sheet","tm":"","h":"<ul>\n<li><strong>Chord = every-other scale note stacked</strong> (C–E–G). Arpeggiate it to fake it on one track.</li>\n<li><strong>Progression = the chord sequence</strong>; bass plays the roots. C–F–G–C and Am–F–C–G are money.</li>\n<li><strong>Groove = off-beat notes + deliberate silence.</strong> Marches are on-beat; funk is between.</li>\n<li><strong>Tension = distance from the root</strong>; resolve to home to feel satisfied. Off-key notes work <em>passing through</em>, not landing.</li>\n<li><strong>Genre = tempo + drum placement + sound choice.</strong> Same grid, different rules.</li>\n<li><strong>Contrast in density</strong> is what turns 4 loops into a song.</li>\n<li><strong>Three tracks is plenty.</strong> Trade phrases, layer octaves, use silence.</li>\n</ul>","ref":true},{"n":null,"v":"★ Reference & Cheat Sheets","t":"Building Blocks cheat sheet","tm":"","h":"<ul>\n<li><strong>Four Chords (I–V–vi–IV):</strong> C–G–A–F. The most-used progression in pop. Learn it cold.</li>\n<li><strong>Sad = minor + descending bass.</strong> Am–F–C–G, or roots walking downward.</li>\n<li><strong>Blues/rock = 3 chords (I–IV–V)</strong> + a bouncing bass + the blues scale.</li>\n<li><strong>Rock riff = rhythm on one note</strong> with small pitch moves. Groove first.</li>\n<li><strong>Walking bass = constant motion, arriving on the root</strong> at each chord change.</li>\n<li><strong>Arpeggio hook = a chord played fast up-and-down.</strong> A whole style on its own.</li>\n<li><strong>Vocal lead = short phrases + breaths + stepwise motion</strong>, resolving home.</li>\n<li><strong>Named beats:</strong> boom-bap, four-on-the-floor, backbeat, dembow. Same kit, different rhythm = different genre.</li>\n<li><strong>Fill → build → drop</strong> is the arc that makes a loop feel produced.</li>\n<li><strong>Sound \"like\" a genre</strong> by recipe, not by copying — the sliders are the same everywhere.</li>\n<li><strong>Famous songs are simple.</strong> These blocks + taste = hits.</li>\n</ul>","ref":true},{"n":null,"v":"★ Reference & Cheat Sheets","t":"Sound & Emotion cheat sheet","tm":"","h":"<p><strong>Mixing &amp; finishing:</strong></p>\n<ul>\n<li><strong>Mud = collision.</strong> Keep bass low+dark, lead high+bright — separation fixes most problems.</li>\n<li><strong>Cutoff assigns space:</strong> dark sinks, bright floats. Use it to keep tracks out of each other's way.</li>\n<li><strong>Subtract, don't add.</strong> One star per moment. Empty space makes full sections hit.</li>\n<li><strong>Echo = distance.</strong> Wet = far, dry = close. Keep the kick dry and tight.</li>\n<li><strong>Finish it.</strong> Two contrasting sections, all parts audible, an arc — then save and move on. Ten finished &gt; one perfect.</li>\n</ul>\n<p><strong>Emotion &amp; storytelling:</strong></p>\n<ul>\n<li><strong>The levers:</strong> major/minor, fast/slow, high/low, dense/sparse, resolved/unresolved. Change one, change the feeling.</li>\n<li><strong>Engineer emotion:</strong> name the feeling first, then pull the levers toward it.</li>\n<li><strong>A song is a journey:</strong> establish → build → peak → release.</li>\n<li><strong>The drop</strong> (silence then fullness) is the chills-giving move. Deny, then deliver.</li>\n<li><strong>Functional music serves the moment</strong> — repeatable for background, dramatic for one-time beats.</li>\n<li><strong>The real test:</strong> can a listener feel what you intended without being told? If yes, you're a composer.</li>\n</ul>","ref":true}];
+
+/* ============ LEARN PANEL CONTROLLER ============ */
+(function(){
+  const panel=document.getElementById('learnPanel');
+  const scrim=document.getElementById('learnScrim');
+  const handle=document.getElementById('learnHandle');
+  const closeBtn=document.getElementById('learnClose');
+  const backBtn=document.getElementById('learnBack');
+  const titleEl=document.getElementById('learnTitle');
+  const listEl=document.getElementById('lessonList');
+  const readerEl=document.getElementById('lessonReader');
+  const readerVol=document.getElementById('readerVol');
+  const readerTime=document.getElementById('readerTime');
+  const readerTitle=document.getElementById('readerTitle');
+  const readerContent=document.getElementById('readerContent');
+  const readerBody=document.querySelector('.learn-body');
+  const markBtn=document.getElementById('markDoneBtn');
+  const markLabel=document.getElementById('markDoneLabel');
+  const nextBtn=document.getElementById('nextLessonBtn');
+  const prevBtn=document.getElementById('prevLessonBtn');
+  const progEl=document.getElementById('learnProg');
+
+  // stable id per card (number, or ref+vol for reference cards)
+  function cardId(c){ return c.ref ? ('ref:'+c.v+':'+c.t) : ('L'+c.n); }
+  // only numbered lessons count toward progress
+  const totalLessons=LESSONS.filter(c=>!c.ref).length;
+
+  let done={}; // id -> true
+  let currentIdx=-1;
+
+  /* ---- persistence: artifact storage if present, else localStorage ---- */
+  const hasStore = (typeof window!=='undefined' && window.storage && window.storage.get);
+  async function loadDone(){
+    try{
+      if(hasStore){
+        const r=await window.storage.get('lessonProgress',false);
+        if(r && r.value) done=JSON.parse(r.value);
+      }else{
+        const raw=localStorage.getItem('lessonProgress');
+        if(raw) done=JSON.parse(raw);
+      }
+    }catch(e){ done={}; }
+  }
+  async function saveDone(){
+    const s=JSON.stringify(done);
+    try{
+      if(hasStore) await window.storage.set('lessonProgress',s,false);
+      else localStorage.setItem('lessonProgress',s);
+    }catch(e){}
+  }
+  function doneCount(){ return LESSONS.filter(c=>!c.ref && done[cardId(c)]).length; }
+  function updateProgBadge(){
+    const n=doneCount();
+    progEl.textContent = n>0 ? (n+'/'+totalLessons) : '';
+  }
+
+  /* ---- render the list, grouped by volume ---- */
+  function renderList(){
+    let html=''; let curVol=null;
+    LESSONS.forEach((c,idx)=>{
+      if(c.v!==curVol){
+        if(curVol!==null) html+='</div>';
+        html+='<div class="vol-group"><div class="vol-label">'+esc(c.v)+'</div>';
+        curVol=c.v;
+      }
+      const id=cardId(c);
+      const isDone=!!done[id];
+      const numLabel=c.ref?'★':(c.n===0?'0':String(c.n));
+      html+='<button class="lesson-item'+(isDone?' done':'')+(c.ref?' ref':'')+'" data-idx="'+idx+'">'
+        +'<span class="li-check">✓</span>'
+        +'<span class="li-num">'+numLabel+'</span>'
+        +'<span class="li-main"><span class="li-title">'+esc(c.t)+'</span>'
+        +(c.tm?'<span class="li-time">'+esc(c.tm)+'</span>':'')+'</span>'
+        +'<span class="li-arrow">›</span></button>';
+    });
+    if(curVol!==null) html+='</div>';
+    listEl.innerHTML=html;
+    listEl.querySelectorAll('.lesson-item').forEach(btn=>{
+      btn.addEventListener('click',()=>openLesson(parseInt(btn.dataset.idx)));
+    });
+    updateProgBadge();
+  }
+  function esc(s){return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  const navRow=document.querySelector('.reader-nav');
+  // find the previous/next NON-ref lesson index from a given position; -1 if none
+  function findAdjacent(idx,dir){
+    let i=idx+dir;
+    while(i>=0 && i<LESSONS.length){
+      if(!LESSONS[i].ref) return i;
+      i+=dir;
+    }
+    return -1;
+  }
+
+  /* ---- open a single lesson ---- */
+  function openLesson(idx){
+    currentIdx=idx;
+    const c=LESSONS[idx];
+    readerVol.textContent=c.v;
+    readerTime.textContent=c.tm||'';
+    readerTitle.textContent = c.ref ? c.t : ((c.n===0?'Lesson 0':'Lesson '+c.n)+' — '+c.t);
+    readerContent.innerHTML=c.h;
+    listEl.classList.add('hidden');
+    readerEl.classList.add('active');
+    backBtn.style.display='flex';
+    titleEl.textContent = c.ref? 'Reference' : ('Lesson '+(c.n===0?'0':c.n));
+    readerBody.scrollTop=0;
+    syncMarkBtn();
+    // nav row + mark: only for numbered lessons
+    navRow.style.display = c.ref ? 'none' : 'flex';
+    markBtn.style.display = c.ref ? 'none' : 'flex';
+    if(!c.ref){
+      prevBtn.disabled = (findAdjacent(idx,-1)===-1);
+      nextBtn.disabled = (findAdjacent(idx,+1)===-1);
+    }
+  }
+  function backToList(){
+    readerEl.classList.remove('active');
+    listEl.classList.remove('hidden');
+    backBtn.style.display='none';
+    titleEl.textContent='Lessons';
+    renderList(); // refresh checkmarks
+  }
+  function syncMarkBtn(){
+    const c=LESSONS[currentIdx]; if(!c) return;
+    const isDone=!!done[cardId(c)];
+    markBtn.classList.toggle('done',isDone);
+    markLabel.textContent = isDone ? '✓ Completed' : 'Mark done';
+  }
+  markBtn.addEventListener('click',async()=>{
+    const c=LESSONS[currentIdx]; if(!c||c.ref) return;
+    const id=cardId(c);
+    if(done[id]) delete done[id]; else done[id]=true;
+    syncMarkBtn(); updateProgBadge(); await saveDone();
+  });
+  nextBtn.addEventListener('click',async()=>{
+    const c=LESSONS[currentIdx];
+    // auto-mark current numbered lesson done when advancing forward
+    if(c && !c.ref && !done[cardId(c)]){ done[cardId(c)]=true; await saveDone(); }
+    const ni=findAdjacent(currentIdx,+1);
+    if(ni!==-1) openLesson(ni);
+  });
+  prevBtn.addEventListener('click',()=>{
+    const pi=findAdjacent(currentIdx,-1);
+    if(pi!==-1) openLesson(pi);
+  });
+
+  /* ---- open / close panel ---- */
+  function openPanel(){
+    panel.classList.add('show'); scrim.classList.add('show');
+    document.body.classList.add('learn-open');
+    if(!readerEl.classList.contains('active')) renderList();
+  }
+  function closePanel(){
+    panel.classList.remove('show'); scrim.classList.remove('show');
+    document.body.classList.remove('learn-open');
+  }
+  handle.addEventListener('click',openPanel);
+  closeBtn.addEventListener('click',closePanel);
+  scrim.addEventListener('click',closePanel);
+  backBtn.addEventListener('click',backToList);
+
+  /* swipe-down to close on the header (phone) */
+  let ty0=null;
+  const head=document.querySelector('.learn-head');
+  head.addEventListener('touchstart',e=>{ty0=e.touches[0].clientY;},{passive:true});
+  head.addEventListener('touchmove',e=>{
+    if(ty0===null) return;
+    const dy=e.touches[0].clientY-ty0;
+    if(dy>60){ closePanel(); ty0=null; }
+  },{passive:true});
+  head.addEventListener('touchend',()=>{ty0=null;});
+
+  /* boot */
+  loadDone().then(()=>{ updateProgBadge(); });
+})();
+
 
 /* ---------- boot ---------- */
 dock.classList.remove('hidden'); // Song is the default active tab
