@@ -1,1 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Pixel Font Creator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --border-color: #334155;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --grid-line: #334155;
+            --cell-bg: #0f172a;
+            --success-color: #10b981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Navigation */
+        header {
+            background-color: var(--panel-bg);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .logo { font-size: 1.25rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+        
+        .controls { display: flex; gap: 0.75rem; align-items: center; }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            background: var(--bg-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            height: 36px;
+        }
+
+        .control-group label { margin: 0 0.5rem; font-size: 0.875rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 0.25rem;}
+        .control-group input[type="number"] {
+            background: transparent; border: none; color: white; width: 36px; text-align: center;
+            font-family: inherit; font-size: 1rem; outline: none;
+        }
+        .control-group input[type="checkbox"] { cursor: pointer; }
+
+        button {
+            background-color: var(--accent-color);
+            color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem;
+            font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.1s;
+            font-family: inherit; font-size: 0.875rem; height: 36px;
+            display: flex; align-items: center; gap: 0.375rem;
+        }
+        button:hover { background-color: var(--accent-hover); }
+        button:active { transform: scale(0.95); }
+        button.secondary { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        button.secondary:hover { background-color: var(--border-color); }
+        button.success { background-color: var(--success-color); }
+        button.success:hover { background-color: #059669; }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Left Panel: All Characters Preview */
+        .sidebar-left {
+            width: 320px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .char-grid {
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .char-card {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .char-card:hover { border-color: var(--accent-color); transform: translateY(-2px); }
+        .char-card.active { border-color: var(--accent-color); background-color: rgba(59, 130, 246, 0.1); box-shadow: 0 0 0 1px var(--accent-color); }
+        .char-card span { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; font-family: monospace; white-space: nowrap; }
+        .char-card canvas { background: var(--bg-color); image-rendering: pixelated; width: 100%; max-width: 40px; }
+
+        /* Center Panel: Editor */
+        .editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            position: relative;
+            padding: 2rem;
+        }
+
+        .editor-title { position: absolute; top: 1.5rem; font-size: 1.5rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 1rem; }
+        .editor-title .char-badge { background: var(--panel-bg); padding: 0.25rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color); font-family: monospace; color: var(--accent-color); }
+
+        .drawing-grid {
+            display: grid;
+            background-color: var(--grid-line);
+            gap: 1px;
+            border: 2px solid var(--grid-line);
+            border-radius: 0.25rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            user-select: none;
+        }
+
+        .cell {
+            background-color: var(--cell-bg);
+            width: 32px;
+            height: 32px;
+            cursor: crosshair;
+            transition: background-color 0.05s;
+        }
+        .cell:hover { background-color: #1e293b; }
+        .cell.active { background-color: var(--accent-color); box-shadow: 0 0 8px rgba(59, 130, 246, 0.5); }
+
+        /* Right Panel: Custom Text & Export */
+        .sidebar-right {
+            width: 350px;
+            background-color: var(--panel-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .test-section {
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            color: white;
+            padding: 0.75rem;
+            resize: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        textarea:focus { border-color: var(--accent-color); }
+
+        .preview-container {
+            flex: 1;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #textPreviewCanvas { image-rendering: pixelated; }
+
+        .export-section {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .export-btn { width: 100%; padding: 0.75rem; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--panel-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+            PixelFont Studio
+        </div>
+        <div class="controls">
+            <!-- Dimensions -->
+            <div class="control-group">
+                <label>W</label>
+                <input type="number" id="fontWidth" value="5" min="2" max="32">
+                <label style="margin-left:0;">H</label>
+                <input type="number" id="fontHeight" value="7" min="2" max="32">
+            </div>
+
+            <!-- Extended ASCII Toggle -->
+            <div class="control-group">
+                <label title="Includes characters 128-255 (e.g., accents, box-drawing)">
+                    <input type="checkbox" id="extendedAsciiToggle" onchange="toggleExtendedAscii()"> Extended ASCII
+                </label>
+            </div>
+
+            <button class="secondary" onclick="resetFont()">New / Clear</button>
+            
+            <!-- Save / Load Project Buttons -->
+            <button class="secondary" onclick="saveProject()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+            </button>
+            <button class="secondary" onclick="document.getElementById('fileInput').click()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Load
+            </button>
+            <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadProject(event)">
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Left Sidebar: Character Selector -->
+        <div class="sidebar-left">
+            <div class="panel-header">
+                <span id="charPanelTitle">ASCII 32-126</span>
+            </div>
+            <div class="char-grid" id="charGrid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Center: Editor -->
+        <div class="editor">
+            <div class="editor-title">
+                Editing Character <div class="char-badge" id="currentCharBadge">'A' (65)</div>
+            </div>
+            <div class="drawing-grid" id="drawingGrid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Right Sidebar: Test & Export -->
+        <div class="sidebar-right">
+            <div class="panel-header">Custom Text Preview</div>
+            <div class="test-section">
+                <!-- Default text updated to contain 'A' so you can see it update instantly -->
+                <textarea id="testInput" placeholder="Type here to test your font...">A B C&#10;Hello World!&#10;É ñ ¿</textarea>
+                <div class="preview-container">
+                    <canvas id="textPreviewCanvas"></canvas>
+                </div>
+            </div>
+            <div class="export-section">
+                <button class="export-btn success" onclick="exportToCpp()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download C++ Header
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State Variables ---
+        let fontWidth = 5;
+        let fontHeight = 7;
+        const START_CHAR = 32;
+        let END_CHAR = 126;
+        let NUM_CHARS = END_CHAR - START_CHAR + 1;
+        
+        let fontData = [];
+        let currentChar = 65; // Default to 'A'
+        
+        let isDrawing = false;
+        let drawMode = 1; // 1 to draw, 0 to erase
+
+        // --- DOM Elements ---
+        const drawingGrid = document.getElementById('drawingGrid');
+        const charGrid = document.getElementById('charGrid');
+        const currentCharBadge = document.getElementById('currentCharBadge');
+        const testInput = document.getElementById('testInput');
+        const textPreviewCanvas = document.getElementById('textPreviewCanvas');
+        const charPanelTitle = document.getElementById('charPanelTitle');
+        const extendedAsciiToggle = document.getElementById('extendedAsciiToggle');
+        const ctxPreview = textPreviewCanvas.getContext('2d');
+
+        // --- Initialization ---
+        function initFont() {
+            fontWidth = parseInt(document.getElementById('fontWidth').value) || 5;
+            fontHeight = parseInt(document.getElementById('fontHeight').value) || 7;
+            
+            // Respect current extended ascii toggle setting
+            const isExtended = extendedAsciiToggle.checked;
+            END_CHAR = isExtended ? 255 : 126;
+            NUM_CHARS = END_CHAR - START_CHAR + 1;
+            
+            // Create empty font data 
+            fontData = Array.from({ length: NUM_CHARS }, () => 
+                Array.from({ length: fontHeight }, () => Array(fontWidth).fill(0))
+            );
+
+            refreshUI();
+        }
+
+        function resetFont() {
+            if(confirm("This will clear all your drawings. Are you sure?")) {
+                initFont();
+            }
+        }
+
+        function toggleExtendedAscii() {
+            const isExtended = extendedAsciiToggle.checked;
+            const oldNumChars = NUM_CHARS;
+            
+            END_CHAR = isExtended ? 255 : 126;
+            NUM_CHARS = END_CHAR - START_CHAR + 1;
+
+            if (isExtended && fontData.length < NUM_CHARS) {
+                // Expanding to Extended ASCII (append empty arrays)
+                for (let i = oldNumChars; i < NUM_CHARS; i++) {
+                    fontData.push(Array.from({ length: fontHeight }, () => Array(fontWidth).fill(0)));
+                }
+            } else if (!isExtended && fontData.length > NUM_CHARS) {
+                // Shrinking back to Standard ASCII
+                if (confirm("Disabling Extended ASCII will delete your drawings for characters 127-255. Are you sure?")) {
+                    fontData = fontData.slice(0, NUM_CHARS);
+                    if (currentChar > END_CHAR) {
+                        currentChar = 65; // Revert to 'A' if they were editing an extended char
+                    }
+                } else {
+                    // Revert checkbox if user cancelled
+                    extendedAsciiToggle.checked = true;
+                    END_CHAR = 255;
+                    NUM_CHARS = END_CHAR - START_CHAR + 1;
+                    return; 
+                }
+            }
+
+            refreshUI();
+        }
+
+        function refreshUI() {
+            charPanelTitle.innerText = `ASCII 32-${END_CHAR}`;
+            setupCharGrid();
+            setupDrawingGrid();
+            selectChar(currentChar);
+            updateTextPreview();
+        }
+
+        // --- Left Panel: Character Grid ---
+        function setupCharGrid() {
+            charGrid.innerHTML = '';
+            for(let i = 0; i < NUM_CHARS; i++) {
+                let asciiCode = i + START_CHAR;
+                
+                let charStr;
+                if (asciiCode === 32) charStr = "SPACE";
+                else if (asciiCode === 127) charStr = "DEL";
+                else charStr = String.fromCharCode(asciiCode);
+                
+                const card = document.createElement('div');
+                card.className = 'char-card';
+                card.id = `char-card-${asciiCode}`;
+                card.onclick = () => selectChar(asciiCode);
+
+                const label = document.createElement('span');
+                label.innerText = charStr;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = fontWidth;
+                canvas.height = fontHeight;
+                canvas.id = `canvas-${asciiCode}`;
+
+                card.appendChild(label);
+                card.appendChild(canvas);
+                charGrid.appendChild(card);
+
+                updateMiniCanvas(asciiCode);
+            }
+        }
+
+        function selectChar(asciiCode) {
+            // Failsafe boundary check
+            if (asciiCode < START_CHAR || asciiCode > END_CHAR) asciiCode = 65;
+            
+            // Update classes
+            document.querySelectorAll('.char-card').forEach(el => el.classList.remove('active'));
+            const activeCard = document.getElementById(`char-card-${asciiCode}`);
+            if(activeCard) activeCard.classList.add('active');
+
+            currentChar = asciiCode;
+            
+            let charStr;
+            if (asciiCode === 32) charStr = "SPACE";
+            else if (asciiCode === 127) charStr = "DEL";
+            else charStr = String.fromCharCode(asciiCode);
+            
+            currentCharBadge.innerText = `'${charStr}' (${asciiCode})`;
+
+            renderDrawingGrid();
+        }
+
+        function updateMiniCanvas(asciiCode) {
+            const canvas = document.getElementById(`canvas-${asciiCode}`);
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const data = fontData[asciiCode - START_CHAR];
+            
+            ctx.clearRect(0, 0, fontWidth, fontHeight);
+            ctx.fillStyle = '#3b82f6';
+            
+            for(let r = 0; r < fontHeight; r++) {
+                for(let c = 0; c < fontWidth; c++) {
+                    if(data[r] && data[r][c]) {
+                        ctx.fillRect(c, r, 1, 1);
+                    }
+                }
+            }
+        }
+
+        // --- Center Panel: Drawing Grid ---
+        function setupDrawingGrid() {
+            drawingGrid.style.gridTemplateColumns = `repeat(${fontWidth}, 1fr)`;
+            drawingGrid.innerHTML = '';
+
+            for(let r = 0; r < fontHeight; r++) {
+                for(let c = 0; c < fontWidth; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+                    
+                    // Mouse Events for drawing
+                    cell.addEventListener('mousedown', (e) => {
+                        isDrawing = true;
+                        const charIdx = currentChar - START_CHAR;
+                        const isFilled = fontData[charIdx][r][c] === 1;
+                        drawMode = isFilled ? 0 : 1;
+                        applyDraw(r, c, cell);
+                    });
+                    
+                    cell.addEventListener('mouseenter', (e) => {
+                        if(isDrawing) applyDraw(r, c, cell);
+                    });
+
+                    drawingGrid.appendChild(cell);
+                }
+            }
+
+            // Global mouse up to stop drawing
+            window.addEventListener('mouseup', () => { isDrawing = false; });
+        }
+
+        function renderDrawingGrid() {
+            const charIdx = currentChar - START_CHAR;
+            const data = fontData[charIdx];
+            
+            const cells = drawingGrid.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                let r = parseInt(cell.dataset.r);
+                let c = parseInt(cell.dataset.c);
+                if(data[r] && data[r][c]) cell.classList.add('active');
+                else cell.classList.remove('active');
+            });
+        }
+
+        function applyDraw(r, c, cellElement) {
+            const charIdx = currentChar - START_CHAR;
+            if(fontData[charIdx][r][c] !== drawMode) {
+                fontData[charIdx][r][c] = drawMode;
+                if(drawMode) cellElement.classList.add('active');
+                else cellElement.classList.remove('active');
+                
+                // Live update side panels IMMEDIATELY as you draw
+                updateMiniCanvas(currentChar);
+                updateTextPreview();
+            }
+        }
+
+        // --- Right Panel: Text Preview ---
+        testInput.addEventListener('input', updateTextPreview);
+
+        function updateTextPreview() {
+            const text = testInput.value;
+            const scale = 3; 
+            const spacing = 1;
+            const lineSpacing = 2;
+
+            // Calculate canvas size required
+            const lines = text.split('\n');
+            let maxChars = 0;
+            lines.forEach(l => { if(l.length > maxChars) maxChars = l.length; });
+
+            const canvasWidth = maxChars * (fontWidth + spacing) * scale;
+            const canvasHeight = lines.length * (fontHeight + lineSpacing) * scale;
+
+            // Ensure min size
+            textPreviewCanvas.width = Math.max(canvasWidth, 200);
+            textPreviewCanvas.height = Math.max(canvasHeight, 100);
+
+            ctxPreview.clearRect(0, 0, textPreviewCanvas.width, textPreviewCanvas.height);
+            ctxPreview.fillStyle = '#f8fafc'; // Text color
+
+            let startY = 0;
+            lines.forEach(line => {
+                let startX = 0;
+                for(let i = 0; i < line.length; i++) {
+                    let code = line.charCodeAt(i);
+                    // Fallback to space if out of range
+                    if(code < START_CHAR || code > END_CHAR) code = 32; 
+                    
+                    const charIdx = code - START_CHAR;
+                    const charData = fontData[charIdx];
+
+                    // Draw the character
+                    if (charData) {
+                        for(let r = 0; r < fontHeight; r++) {
+                            for(let c = 0; c < fontWidth; c++) {
+                                if(charData[r] && charData[r][c]) {
+                                    ctxPreview.fillRect(startX + (c * scale), startY + (r * scale), scale, scale);
+                                }
+                            }
+                        }
+                    }
+                    startX += (fontWidth + spacing) * scale;
+                }
+                startY += (fontHeight + lineSpacing) * scale;
+            });
+        }
+
+        // --- Project Save / Load (JSON) ---
+        function saveProject() {
+            const projectData = {
+                width: fontWidth,
+                height: fontHeight,
+                extended: extendedAsciiToggle.checked,
+                data: fontData
+            };
+            
+            const blob = new Blob([JSON.stringify(projectData)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pixel_font_${fontWidth}x${fontHeight}${extendedAsciiToggle.checked ? '_extended' : ''}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadProject(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const project = JSON.parse(e.target.result);
+                    if (project.width && project.height && project.data) {
+                        fontWidth = project.width;
+                        fontHeight = project.height;
+                        fontData = project.data;
+                        
+                        // Infer extended ascii from data size if not explicitly saved
+                        let isExtended = project.extended !== undefined ? project.extended : (fontData.length > 95);
+                        extendedAsciiToggle.checked = isExtended;
+                        END_CHAR = isExtended ? 255 : 126;
+                        NUM_CHARS = END_CHAR - START_CHAR + 1;
+
+                        // Update inputs on UI
+                        document.getElementById('fontWidth').value = fontWidth;
+                        document.getElementById('fontHeight').value = fontHeight;
+
+                        refreshUI();
+                    } else {
+                        alert("Invalid project file format.");
+                    }
+                } catch (err) {
+                    alert("Error reading file.");
+                }
+            };
+            reader.readAsText(file);
+            // Reset input so the same file can be loaded again if needed
+            event.target.value = ''; 
+        }
+
+        // --- C++ Export ---
+        function exportToCpp() {
+            let dataType = "uint8_t";
+            if (fontWidth > 8) dataType = "uint16_t";
+            if (fontWidth > 16) dataType = "uint32_t";
+
+            let cpp = `// Custom ${fontWidth}x${fontHeight} Pixel Font\n`;
+            cpp += `// Generated by Modern Pixel Font Creator\n\n`;
+            cpp += `#ifndef CUSTOM_FONT_H\n`;
+            cpp += `#define CUSTOM_FONT_H\n\n`;
+            cpp += `#include <stdint.h>\n\n`;
+            cpp += `const int FONT_WIDTH = ${fontWidth};\n`;
+            cpp += `const int FONT_HEIGHT = ${fontHeight};\n`;
+            cpp += `const int FONT_START_CHAR = ${START_CHAR};\n`;
+            cpp += `const int FONT_END_CHAR = ${END_CHAR};\n\n`;
+            cpp += `// Array format: [${NUM_CHARS} characters][${fontHeight} rows]\n`;
+            cpp += `// Each row is bit-packed from left-to-right (MSB is left-most pixel)\n`;
+            cpp += `const ${dataType} custom_font[${NUM_CHARS}][${fontHeight}] = {\n`;
+
+            for(let i = 0; i < NUM_CHARS; i++) {
+                let asciiCode = i + START_CHAR;
+                // Safely format the character comment
+                let charStr;
+                if(asciiCode === 92) charStr = "'\\\\'"; // backslash
+                else if(asciiCode === 34) charStr = "'\\\"'"; // double quote
+                else if(asciiCode === 32) charStr = "SPACE";
+                else if(asciiCode === 127) charStr = "DEL";
+                else charStr = `'${String.fromCharCode(asciiCode)}'`;
+
+                cpp += `  { // ${asciiCode} ${charStr}\n`;
+                for(let r = 0; r < fontHeight; r++) {
+                    let rowVal = 0;
+                    for(let c = 0; c < fontWidth; c++) {
+                        if (fontData[i] && fontData[i][r] && fontData[i][r][c]) {
+                            rowVal |= (1 << (fontWidth - 1 - c));
+                        }
+                    }
+                    let hexStr = rowVal.toString(16).toUpperCase();
+                    // Pad with zeros based on data type size
+                    let padLen = fontWidth > 16 ? 8 : (fontWidth > 8 ? 4 : 2);
+                    hexStr = hexStr.padStart(padLen, '0');
+                    cpp += `    0x${hexStr}, `;
+                }
+                cpp += `\n  },\n`;
+            }
+            cpp += `};\n\n`;
+            cpp += `#endif // CUSTOM_FONT_H\n`;
+
+            // Trigger File Download
+            const blob = new Blob([cpp], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `font_${fontWidth}x${fontHeight}.h`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize on load
+        window.onload = initFont;
+
+    </script>
+</body>
+</html>
