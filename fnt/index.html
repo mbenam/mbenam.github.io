@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern Pixel Font Creator</title>
+    <!-- OpenType.js library for TTF generation -->
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -18,6 +20,7 @@
             --grid-line: #334155;
             --cell-bg: #0f172a;
             --success-color: #10b981;
+            --warning-color: #f59e0b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -78,6 +81,8 @@
         button.secondary:hover { background-color: var(--border-color); }
         button.success { background-color: var(--success-color); }
         button.success:hover { background-color: #059669; }
+        button.warning { background-color: var(--warning-color); }
+        button.warning:hover { background-color: #d97706; }
 
         /* Main Layout */
         .main-container {
@@ -303,9 +308,21 @@
                 </div>
             </div>
             <div class="export-section">
+                <button class="export-btn warning" onclick="exportToTtf()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download Vector TTF (.ttf)
+                </button>
                 <button class="export-btn success" onclick="exportToCpp()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download C++ Header
+                    Download C++ Header (.h)
+                </button>
+                <button class="export-btn success" onclick="exportToBdf()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download BDF (.bdf)
+                </button>
+                <button class="export-btn success" onclick="exportToPsf()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download PSF2 (.psf)
                 </button>
             </div>
         </div>
@@ -340,12 +357,10 @@
             fontWidth = parseInt(document.getElementById('fontWidth').value) || 5;
             fontHeight = parseInt(document.getElementById('fontHeight').value) || 7;
             
-            // Respect current extended ascii toggle setting
             const isExtended = extendedAsciiToggle.checked;
             END_CHAR = isExtended ? 255 : 126;
             NUM_CHARS = END_CHAR - START_CHAR + 1;
             
-            // Create empty font data 
             fontData = Array.from({ length: NUM_CHARS }, () => 
                 Array.from({ length: fontHeight }, () => Array(fontWidth).fill(0))
             );
@@ -367,19 +382,14 @@
             NUM_CHARS = END_CHAR - START_CHAR + 1;
 
             if (isExtended && fontData.length < NUM_CHARS) {
-                // Expanding to Extended ASCII (append empty arrays)
                 for (let i = oldNumChars; i < NUM_CHARS; i++) {
                     fontData.push(Array.from({ length: fontHeight }, () => Array(fontWidth).fill(0)));
                 }
             } else if (!isExtended && fontData.length > NUM_CHARS) {
-                // Shrinking back to Standard ASCII
                 if (confirm("Disabling Extended ASCII will delete your drawings for characters 127-255. Are you sure?")) {
                     fontData = fontData.slice(0, NUM_CHARS);
-                    if (currentChar > END_CHAR) {
-                        currentChar = 65; // Revert to 'A' if they were editing an extended char
-                    }
+                    if (currentChar > END_CHAR) currentChar = 65;
                 } else {
-                    // Revert checkbox if user cancelled
                     extendedAsciiToggle.checked = true;
                     END_CHAR = 255;
                     NUM_CHARS = END_CHAR - START_CHAR + 1;
@@ -431,10 +441,8 @@
         }
 
         function selectChar(asciiCode) {
-            // Failsafe boundary check
             if (asciiCode < START_CHAR || asciiCode > END_CHAR) asciiCode = 65;
             
-            // Update classes
             document.querySelectorAll('.char-card').forEach(el => el.classList.remove('active'));
             const activeCard = document.getElementById(`char-card-${asciiCode}`);
             if(activeCard) activeCard.classList.add('active');
@@ -481,7 +489,6 @@
                     cell.dataset.r = r;
                     cell.dataset.c = c;
                     
-                    // Mouse Events for drawing
                     cell.addEventListener('mousedown', (e) => {
                         isDrawing = true;
                         const charIdx = currentChar - START_CHAR;
@@ -497,8 +504,6 @@
                     drawingGrid.appendChild(cell);
                 }
             }
-
-            // Global mouse up to stop drawing
             window.addEventListener('mouseup', () => { isDrawing = false; });
         }
 
@@ -522,7 +527,6 @@
                 if(drawMode) cellElement.classList.add('active');
                 else cellElement.classList.remove('active');
                 
-                // Live update side panels IMMEDIATELY as you draw
                 updateMiniCanvas(currentChar);
                 updateTextPreview();
             }
@@ -537,7 +541,6 @@
             const spacing = 1;
             const lineSpacing = 2;
 
-            // Calculate canvas size required
             const lines = text.split('\n');
             let maxChars = 0;
             lines.forEach(l => { if(l.length > maxChars) maxChars = l.length; });
@@ -545,25 +548,22 @@
             const canvasWidth = maxChars * (fontWidth + spacing) * scale;
             const canvasHeight = lines.length * (fontHeight + lineSpacing) * scale;
 
-            // Ensure min size
             textPreviewCanvas.width = Math.max(canvasWidth, 200);
             textPreviewCanvas.height = Math.max(canvasHeight, 100);
 
             ctxPreview.clearRect(0, 0, textPreviewCanvas.width, textPreviewCanvas.height);
-            ctxPreview.fillStyle = '#f8fafc'; // Text color
+            ctxPreview.fillStyle = '#f8fafc'; 
 
             let startY = 0;
             lines.forEach(line => {
                 let startX = 0;
                 for(let i = 0; i < line.length; i++) {
                     let code = line.charCodeAt(i);
-                    // Fallback to space if out of range
                     if(code < START_CHAR || code > END_CHAR) code = 32; 
                     
                     const charIdx = code - START_CHAR;
                     const charData = fontData[charIdx];
 
-                    // Draw the character
                     if (charData) {
                         for(let r = 0; r < fontHeight; r++) {
                             for(let c = 0; c < fontWidth; c++) {
@@ -582,20 +582,15 @@
         // --- Project Save / Load (JSON) ---
         function saveProject() {
             const projectData = {
-                width: fontWidth,
-                height: fontHeight,
-                extended: extendedAsciiToggle.checked,
-                data: fontData
+                width: fontWidth, height: fontHeight,
+                extended: extendedAsciiToggle.checked, data: fontData
             };
-            
             const blob = new Blob([JSON.stringify(projectData)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = `pixel_font_${fontWidth}x${fontHeight}${extendedAsciiToggle.checked ? '_extended' : ''}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
@@ -612,92 +607,172 @@
                         fontHeight = project.height;
                         fontData = project.data;
                         
-                        // Infer extended ascii from data size if not explicitly saved
                         let isExtended = project.extended !== undefined ? project.extended : (fontData.length > 95);
                         extendedAsciiToggle.checked = isExtended;
                         END_CHAR = isExtended ? 255 : 126;
                         NUM_CHARS = END_CHAR - START_CHAR + 1;
 
-                        // Update inputs on UI
                         document.getElementById('fontWidth').value = fontWidth;
                         document.getElementById('fontHeight').value = fontHeight;
-
                         refreshUI();
-                    } else {
-                        alert("Invalid project file format.");
-                    }
-                } catch (err) {
-                    alert("Error reading file.");
-                }
+                    } else alert("Invalid project file format.");
+                } catch (err) { alert("Error reading file."); }
             };
             reader.readAsText(file);
-            // Reset input so the same file can be loaded again if needed
             event.target.value = ''; 
         }
 
-        // --- C++ Export ---
+        // --- EXPORT FUNCTIONS ---
+
+        // 1. TTF Export using OpenType.js
+        function exportToTtf() {
+            if (typeof opentype === 'undefined') {
+                alert("OpenType.js library is still loading or failed to load. Ensure you have an internet connection.");
+                return;
+            }
+
+            // We scale up the pixel grid to match standard font coordinate sizes
+            const scale = 100; // 1 pixel = 100 font units
+            
+            // Standard missing character glyph required by TTF format
+            const notdefGlyph = new opentype.Glyph({
+                name: '.notdef',
+                unicode: 0,
+                advanceWidth: fontWidth * scale,
+                path: new opentype.Path()
+            });
+
+            const glyphs = [notdefGlyph];
+
+            for (let i = 0; i < NUM_CHARS; i++) {
+                let asciiCode = i + START_CHAR;
+                let charData = fontData[i];
+                let path = new opentype.Path();
+
+                for (let r = 0; r < fontHeight; r++) {
+                    for (let c = 0; c < fontWidth; c++) {
+                        if (charData && charData[r] && charData[r][c]) {
+                            // TTF coordinate system has Y going UP from baseline
+                            let x = c * scale;
+                            let y = (fontHeight - 1 - r) * scale; 
+                            
+                            // Draw a vector square (clockwise coordinates)
+                            path.moveTo(x, y);
+                            path.lineTo(x, y + scale);
+                            path.lineTo(x + scale, y + scale);
+                            path.lineTo(x + scale, y);
+                            path.close();
+                        }
+                    }
+                }
+
+                let glyph = new opentype.Glyph({
+                    name: String.fromCharCode(asciiCode),
+                    unicode: asciiCode,
+                    advanceWidth: (fontWidth + 1) * scale, // Add 1 "pixel" of spacing automatically
+                    path: path
+                });
+                glyphs.push(glyph);
+            }
+
+            const font = new opentype.Font({
+                familyName: `Pixel Font ${fontWidth}x${fontHeight}`,
+                styleName: 'Regular',
+                unitsPerEm: fontHeight * scale, // Map EM scale directly to font height
+                ascender: fontHeight * scale,
+                descender: 0,
+                glyphs: glyphs
+            });
+
+            // The OpenType.js library handles the binary compilation and trigger the download automatically
+            font.download(`pixel_font_${fontWidth}x${fontHeight}.ttf`);
+        }
+
+        // 2. C++ Array Export
         function exportToCpp() {
             let dataType = "uint8_t";
             if (fontWidth > 8) dataType = "uint16_t";
             if (fontWidth > 16) dataType = "uint32_t";
 
-            let cpp = `// Custom ${fontWidth}x${fontHeight} Pixel Font\n`;
-            cpp += `// Generated by Modern Pixel Font Creator\n\n`;
-            cpp += `#ifndef CUSTOM_FONT_H\n`;
-            cpp += `#define CUSTOM_FONT_H\n\n`;
-            cpp += `#include <stdint.h>\n\n`;
-            cpp += `const int FONT_WIDTH = ${fontWidth};\n`;
-            cpp += `const int FONT_HEIGHT = ${fontHeight};\n`;
-            cpp += `const int FONT_START_CHAR = ${START_CHAR};\n`;
-            cpp += `const int FONT_END_CHAR = ${END_CHAR};\n\n`;
-            cpp += `// Array format: [${NUM_CHARS} characters][${fontHeight} rows]\n`;
-            cpp += `// Each row is bit-packed from left-to-right (MSB is left-most pixel)\n`;
-            cpp += `const ${dataType} custom_font[${NUM_CHARS}][${fontHeight}] = {\n`;
-
+            let cpp = `// Custom ${fontWidth}x${fontHeight} Pixel Font\n#ifndef CUSTOM_FONT_H\n#define CUSTOM_FONT_H\n\n#include <stdint.h>\n\nconst int FONT_WIDTH = ${fontWidth};\nconst int FONT_HEIGHT = ${fontHeight};\nconst int FONT_START_CHAR = ${START_CHAR};\nconst int FONT_END_CHAR = ${END_CHAR};\n\nconst ${dataType} custom_font[${NUM_CHARS}][${fontHeight}] = {\n`;
             for(let i = 0; i < NUM_CHARS; i++) {
                 let asciiCode = i + START_CHAR;
-                // Safely format the character comment
-                let charStr;
-                if(asciiCode === 92) charStr = "'\\\\'"; // backslash
-                else if(asciiCode === 34) charStr = "'\\\"'"; // double quote
-                else if(asciiCode === 32) charStr = "SPACE";
-                else if(asciiCode === 127) charStr = "DEL";
-                else charStr = `'${String.fromCharCode(asciiCode)}'`;
-
+                let charStr = asciiCode === 92 ? "'\\\\'" : asciiCode === 34 ? "'\\\"'" : asciiCode === 32 ? "SPACE" : asciiCode === 127 ? "DEL" : `'${String.fromCharCode(asciiCode)}'`;
                 cpp += `  { // ${asciiCode} ${charStr}\n`;
                 for(let r = 0; r < fontHeight; r++) {
                     let rowVal = 0;
-                    for(let c = 0; c < fontWidth; c++) {
-                        if (fontData[i] && fontData[i][r] && fontData[i][r][c]) {
-                            rowVal |= (1 << (fontWidth - 1 - c));
-                        }
-                    }
-                    let hexStr = rowVal.toString(16).toUpperCase();
-                    // Pad with zeros based on data type size
-                    let padLen = fontWidth > 16 ? 8 : (fontWidth > 8 ? 4 : 2);
-                    hexStr = hexStr.padStart(padLen, '0');
-                    cpp += `    0x${hexStr}, `;
+                    for(let c = 0; c < fontWidth; c++) if (fontData[i][r][c]) rowVal |= (1 << (fontWidth - 1 - c));
+                    cpp += `    0x${rowVal.toString(16).toUpperCase().padStart(fontWidth > 16 ? 8 : (fontWidth > 8 ? 4 : 2), '0')}, `;
                 }
                 cpp += `\n  },\n`;
             }
-            cpp += `};\n\n`;
-            cpp += `#endif // CUSTOM_FONT_H\n`;
+            cpp += `};\n#endif // CUSTOM_FONT_H\n`;
+            downloadFile(cpp, `font_${fontWidth}x${fontHeight}.h`, 'text/plain');
+        }
 
-            // Trigger File Download
-            const blob = new Blob([cpp], { type: 'text/plain' });
+        // 3. BDF Export
+        function exportToBdf() {
+            let bdf = `STARTFONT 2.1\nFONT -custom-font-medium-r-normal--${fontHeight}-${fontHeight}0-75-75-c-${fontWidth}0-iso10646-1\nSIZE ${fontHeight} 75 75\nFONTBOUNDINGBOX ${fontWidth} ${fontHeight} 0 0\nSTARTPROPERTIES 2\nFONT_ASCENT ${fontHeight}\nFONT_DESCENT 0\nENDPROPERTIES\nCHARS ${NUM_CHARS}\n`;
+            const bytesPerRow = Math.ceil(fontWidth / 8);
+            for (let i = 0; i < NUM_CHARS; i++) {
+                let asciiCode = i + START_CHAR;
+                bdf += `STARTCHAR U+${asciiCode.toString(16).toUpperCase().padStart(4, '0')}\nENCODING ${asciiCode}\nSWIDTH ${fontWidth * 10} 0\nDWIDTH ${fontWidth} 0\nBBX ${fontWidth} ${fontHeight} 0 0\nBITMAP\n`;
+                for (let r = 0; r < fontHeight; r++) {
+                    let rowHex = "";
+                    for (let b = 0; b < bytesPerRow; b++) {
+                        let byteVal = 0;
+                        for (let bit = 0; bit < 8; bit++) {
+                            let c = b * 8 + bit;
+                            if (c < fontWidth && fontData[i][r][c]) byteVal |= (1 << (7 - bit));
+                        }
+                        rowHex += byteVal.toString(16).toUpperCase().padStart(2, '0');
+                    }
+                    bdf += `${rowHex}\n`;
+                }
+                bdf += `ENDCHAR\n`;
+            }
+            bdf += `ENDFONT\n`;
+            downloadFile(bdf, `font_${fontWidth}x${fontHeight}.bdf`, 'text/plain');
+        }
+
+        // 4. PSF2 Export
+        function exportToPsf() {
+            const HEADER_SIZE = 32, totalGlyphs = END_CHAR + 1; 
+            const bytesPerRow = Math.ceil(fontWidth / 8), bytesPerGlyph = fontHeight * bytesPerRow;
+            const buffer = new Uint8Array(HEADER_SIZE + (totalGlyphs * bytesPerGlyph));
+            const dv = new DataView(buffer.buffer);
+            buffer.set([0x72, 0xb5, 0x4a, 0x86], 0);
+            dv.setUint32(4, 0, true); dv.setUint32(8, HEADER_SIZE, true); dv.setUint32(12, 0, true);
+            dv.setUint32(16, totalGlyphs, true); dv.setUint32(20, bytesPerGlyph, true);
+            dv.setUint32(24, fontHeight, true); dv.setUint32(28, fontWidth, true);
+            
+            let offset = HEADER_SIZE;
+            for (let asciiCode = 0; asciiCode <= END_CHAR; asciiCode++) {
+                let dataIdx = asciiCode - START_CHAR;
+                let hasData = (dataIdx >= 0 && dataIdx < NUM_CHARS && fontData[dataIdx]);
+                for (let r = 0; r < fontHeight; r++) {
+                    for (let b = 0; b < bytesPerRow; b++) {
+                        let byteVal = 0;
+                        for (let bit = 0; bit < 8; bit++) {
+                            let c = b * 8 + bit;
+                            if (c < fontWidth && hasData && fontData[dataIdx][r][c]) byteVal |= (1 << (7 - bit));
+                        }
+                        buffer[offset++] = byteVal;
+                    }
+                }
+            }
+            downloadFile(buffer, `font_${fontWidth}x${fontHeight}.psf`, 'application/octet-stream');
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `font_${fontWidth}x${fontHeight}.h`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            const a = document.createElement('a'); a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
-        // Initialize on load
         window.onload = initFont;
-
     </script>
 </body>
 </html>
