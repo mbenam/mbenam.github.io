@@ -31,7 +31,7 @@
             color: var(--text-main);
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            height: 100vh; /* Default for desktop */
             overflow: hidden;
         }
 
@@ -116,7 +116,7 @@
         .char-grid {
             padding: 1rem;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
             gap: 0.5rem;
             overflow-y: auto;
             flex: 1;
@@ -146,11 +146,21 @@
             align-items: center;
             justify-content: center;
             background-color: var(--bg-color);
-            position: relative;
             padding: 2rem;
+            overflow-y: auto;
         }
 
-        .editor-title { position: absolute; top: 1.5rem; font-size: 1.5rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 1rem; }
+        .editor-title { 
+            margin-bottom: 1.5rem; 
+            font-size: 1.5rem; 
+            font-weight: 600; 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+            flex-wrap: wrap;
+            justify-content: center;
+        }
         .editor-title .char-badge { background: var(--panel-bg); padding: 0.25rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color); font-family: monospace; color: var(--accent-color); }
 
         .drawing-grid {
@@ -161,12 +171,14 @@
             border-radius: 0.25rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             user-select: none;
+            touch-action: none; /* Prevents screen scrolling while drawing on mobile */
         }
 
         .cell {
             background-color: var(--cell-bg);
-            width: 32px;
-            height: 32px;
+            /* Size controlled via CSS variable for responsive scaling */
+            width: var(--cell-size, 32px);
+            height: var(--cell-size, 32px);
             cursor: crosshair;
             transition: background-color 0.05s;
         }
@@ -216,6 +228,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100px;
         }
         
         #textPreviewCanvas { image-rendering: pixelated; }
@@ -236,6 +249,38 @@
         ::-webkit-scrollbar-track { background: var(--panel-bg); }
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 900px) {
+            body {
+                height: auto; /* Allow native scrolling */
+                overflow-y: auto;
+            }
+            .main-container {
+                flex-direction: column;
+                overflow: visible;
+            }
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            .controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .logo { justify-content: center; }
+            .sidebar-left, .sidebar-right {
+                width: 100%;
+                border: none;
+            }
+            .sidebar-left {
+                border-bottom: 1px solid var(--border-color);
+                height: 350px; /* Fixed scrollable block for mobile */
+            }
+            .sidebar-right { border-top: 1px solid var(--border-color); }
+            .editor { padding: 1.5rem 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -246,7 +291,6 @@
             PixelFont Studio
         </div>
         <div class="controls">
-            <!-- Dimensions -->
             <div class="control-group">
                 <label>W</label>
                 <input type="number" id="fontWidth" value="5" min="2" max="32">
@@ -254,16 +298,13 @@
                 <input type="number" id="fontHeight" value="7" min="2" max="32">
             </div>
 
-            <!-- Extended ASCII Toggle -->
             <div class="control-group">
-                <label title="Includes characters 128-255 (e.g., accents, box-drawing)">
+                <label title="Includes characters 128-255">
                     <input type="checkbox" id="extendedAsciiToggle" onchange="toggleExtendedAscii()"> Extended ASCII
                 </label>
             </div>
 
             <button class="secondary" onclick="resetFont()">New / Clear</button>
-            
-            <!-- Save / Load Project Buttons -->
             <button class="secondary" onclick="saveProject()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Save
@@ -290,7 +331,7 @@
         <!-- Center: Editor -->
         <div class="editor">
             <div class="editor-title">
-                Editing Character <div class="char-badge" id="currentCharBadge">'A' (65)</div>
+                Editing <div class="char-badge" id="currentCharBadge">'A' (65)</div>
             </div>
             <div class="drawing-grid" id="drawingGrid">
                 <!-- Dynamically populated -->
@@ -301,7 +342,6 @@
         <div class="sidebar-right">
             <div class="panel-header">Custom Text Preview</div>
             <div class="test-section">
-                <!-- Default text updated to contain 'A' so you can see it update instantly -->
                 <textarea id="testInput" placeholder="Type here to test your font...">A B C&#10;Hello World!&#10;É ñ ¿</textarea>
                 <div class="preview-container">
                     <canvas id="textPreviewCanvas"></canvas>
@@ -329,7 +369,6 @@
     </div>
 
     <script>
-        // --- State Variables ---
         let fontWidth = 5;
         let fontHeight = 7;
         const START_CHAR = 32;
@@ -337,12 +376,11 @@
         let NUM_CHARS = END_CHAR - START_CHAR + 1;
         
         let fontData = [];
-        let currentChar = 65; // Default to 'A'
+        let currentChar = 65; 
         
         let isDrawing = false;
-        let drawMode = 1; // 1 to draw, 0 to erase
+        let drawMode = 1; 
 
-        // --- DOM Elements ---
         const drawingGrid = document.getElementById('drawingGrid');
         const charGrid = document.getElementById('charGrid');
         const currentCharBadge = document.getElementById('currentCharBadge');
@@ -352,7 +390,16 @@
         const extendedAsciiToggle = document.getElementById('extendedAsciiToggle');
         const ctxPreview = textPreviewCanvas.getContext('2d');
 
-        // --- Initialization ---
+        // Dynamic Resize Logic for Mobile grids
+        function updateCellSize() {
+            const padding = 64; 
+            const availableWidth = window.innerWidth <= 900 ? window.innerWidth - padding : 600;
+            const maxCellSize = Math.floor(availableWidth / fontWidth);
+            const cellSize = Math.min(32, maxCellSize);
+            drawingGrid.style.setProperty('--cell-size', `${Math.max(8, cellSize)}px`);
+        }
+        window.addEventListener('resize', updateCellSize);
+
         function initFont() {
             fontWidth = parseInt(document.getElementById('fontWidth').value) || 5;
             fontHeight = parseInt(document.getElementById('fontHeight').value) || 7;
@@ -369,15 +416,12 @@
         }
 
         function resetFont() {
-            if(confirm("This will clear all your drawings. Are you sure?")) {
-                initFont();
-            }
+            if(confirm("This will clear all your drawings. Are you sure?")) initFont();
         }
 
         function toggleExtendedAscii() {
             const isExtended = extendedAsciiToggle.checked;
             const oldNumChars = NUM_CHARS;
-            
             END_CHAR = isExtended ? 255 : 126;
             NUM_CHARS = END_CHAR - START_CHAR + 1;
 
@@ -396,7 +440,6 @@
                     return; 
                 }
             }
-
             refreshUI();
         }
 
@@ -408,16 +451,11 @@
             updateTextPreview();
         }
 
-        // --- Left Panel: Character Grid ---
         function setupCharGrid() {
             charGrid.innerHTML = '';
             for(let i = 0; i < NUM_CHARS; i++) {
                 let asciiCode = i + START_CHAR;
-                
-                let charStr;
-                if (asciiCode === 32) charStr = "SPACE";
-                else if (asciiCode === 127) charStr = "DEL";
-                else charStr = String.fromCharCode(asciiCode);
+                let charStr = asciiCode === 32 ? "SPACE" : asciiCode === 127 ? "DEL" : String.fromCharCode(asciiCode);
                 
                 const card = document.createElement('div');
                 card.className = 'char-card';
@@ -428,34 +466,24 @@
                 label.innerText = charStr;
 
                 const canvas = document.createElement('canvas');
-                canvas.width = fontWidth;
-                canvas.height = fontHeight;
+                canvas.width = fontWidth; canvas.height = fontHeight;
                 canvas.id = `canvas-${asciiCode}`;
 
-                card.appendChild(label);
-                card.appendChild(canvas);
+                card.appendChild(label); card.appendChild(canvas);
                 charGrid.appendChild(card);
-
                 updateMiniCanvas(asciiCode);
             }
         }
 
         function selectChar(asciiCode) {
             if (asciiCode < START_CHAR || asciiCode > END_CHAR) asciiCode = 65;
-            
             document.querySelectorAll('.char-card').forEach(el => el.classList.remove('active'));
             const activeCard = document.getElementById(`char-card-${asciiCode}`);
             if(activeCard) activeCard.classList.add('active');
 
             currentChar = asciiCode;
-            
-            let charStr;
-            if (asciiCode === 32) charStr = "SPACE";
-            else if (asciiCode === 127) charStr = "DEL";
-            else charStr = String.fromCharCode(asciiCode);
-            
+            let charStr = asciiCode === 32 ? "SPACE" : asciiCode === 127 ? "DEL" : String.fromCharCode(asciiCode);
             currentCharBadge.innerText = `'${charStr}' (${asciiCode})`;
-
             renderDrawingGrid();
         }
 
@@ -467,18 +495,15 @@
             
             ctx.clearRect(0, 0, fontWidth, fontHeight);
             ctx.fillStyle = '#3b82f6';
-            
             for(let r = 0; r < fontHeight; r++) {
                 for(let c = 0; c < fontWidth; c++) {
-                    if(data[r] && data[r][c]) {
-                        ctx.fillRect(c, r, 1, 1);
-                    }
+                    if(data[r] && data[r][c]) ctx.fillRect(c, r, 1, 1);
                 }
             }
         }
 
-        // --- Center Panel: Drawing Grid ---
         function setupDrawingGrid() {
+            updateCellSize(); // Scale to mobile dynamically
             drawingGrid.style.gridTemplateColumns = `repeat(${fontWidth}, 1fr)`;
             drawingGrid.innerHTML = '';
 
@@ -486,31 +511,54 @@
                 for(let c = 0; c < fontWidth; c++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
-                    cell.dataset.r = r;
-                    cell.dataset.c = c;
+                    cell.dataset.r = r; cell.dataset.c = c;
                     
+                    // Desktop Listeners
                     cell.addEventListener('mousedown', (e) => {
                         isDrawing = true;
                         const charIdx = currentChar - START_CHAR;
-                        const isFilled = fontData[charIdx][r][c] === 1;
-                        drawMode = isFilled ? 0 : 1;
+                        drawMode = fontData[charIdx][r][c] === 1 ? 0 : 1;
                         applyDraw(r, c, cell);
                     });
-                    
                     cell.addEventListener('mouseenter', (e) => {
                         if(isDrawing) applyDraw(r, c, cell);
                     });
 
+                    // Mobile Touch Listeners (Prevent scroll trigger & start drawing)
+                    cell.addEventListener('touchstart', (e) => {
+                        e.preventDefault(); 
+                        isDrawing = true;
+                        const charIdx = currentChar - START_CHAR;
+                        drawMode = fontData[charIdx][r][c] === 1 ? 0 : 1;
+                        applyDraw(r, c, cell);
+                    }, { passive: false });
+
                     drawingGrid.appendChild(cell);
                 }
             }
+
+            // Mobile sliding/drawing event
+            drawingGrid.addEventListener('touchmove', (e) => {
+                if(!isDrawing) return;
+                e.preventDefault(); // Stop page scroll
+                const touch = e.touches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if(target && target.classList.contains('cell')) {
+                    const tr = parseInt(target.dataset.r);
+                    const tc = parseInt(target.dataset.c);
+                    applyDraw(tr, tc, target);
+                }
+            }, { passive: false });
+
+            // Global stops
             window.addEventListener('mouseup', () => { isDrawing = false; });
+            window.addEventListener('touchend', () => { isDrawing = false; });
+            window.addEventListener('touchcancel', () => { isDrawing = false; });
         }
 
         function renderDrawingGrid() {
             const charIdx = currentChar - START_CHAR;
             const data = fontData[charIdx];
-            
             const cells = drawingGrid.querySelectorAll('.cell');
             cells.forEach(cell => {
                 let r = parseInt(cell.dataset.r);
@@ -532,24 +580,17 @@
             }
         }
 
-        // --- Right Panel: Text Preview ---
         testInput.addEventListener('input', updateTextPreview);
 
         function updateTextPreview() {
             const text = testInput.value;
-            const scale = 3; 
-            const spacing = 1;
-            const lineSpacing = 2;
-
+            const scale = 3, spacing = 1, lineSpacing = 2;
             const lines = text.split('\n');
             let maxChars = 0;
             lines.forEach(l => { if(l.length > maxChars) maxChars = l.length; });
 
-            const canvasWidth = maxChars * (fontWidth + spacing) * scale;
-            const canvasHeight = lines.length * (fontHeight + lineSpacing) * scale;
-
-            textPreviewCanvas.width = Math.max(canvasWidth, 200);
-            textPreviewCanvas.height = Math.max(canvasHeight, 100);
+            textPreviewCanvas.width = Math.max(maxChars * (fontWidth + spacing) * scale, 200);
+            textPreviewCanvas.height = Math.max(lines.length * (fontHeight + lineSpacing) * scale, 100);
 
             ctxPreview.clearRect(0, 0, textPreviewCanvas.width, textPreviewCanvas.height);
             ctxPreview.fillStyle = '#f8fafc'; 
@@ -561,9 +602,7 @@
                     let code = line.charCodeAt(i);
                     if(code < START_CHAR || code > END_CHAR) code = 32; 
                     
-                    const charIdx = code - START_CHAR;
-                    const charData = fontData[charIdx];
-
+                    const charData = fontData[code - START_CHAR];
                     if (charData) {
                         for(let r = 0; r < fontHeight; r++) {
                             for(let c = 0; c < fontWidth; c++) {
@@ -579,42 +618,28 @@
             });
         }
 
-        // --- Project Save / Load (JSON) ---
         function saveProject() {
-            const projectData = {
-                width: fontWidth, height: fontHeight,
-                extended: extendedAsciiToggle.checked, data: fontData
-            };
+            const projectData = { width: fontWidth, height: fontHeight, extended: extendedAsciiToggle.checked, data: fontData };
             const blob = new Blob([JSON.stringify(projectData)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `pixel_font_${fontWidth}x${fontHeight}${extendedAsciiToggle.checked ? '_extended' : ''}.json`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            a.href = url; a.download = `pixel_font_${fontWidth}x${fontHeight}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         }
 
         function loadProject(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const project = JSON.parse(e.target.result);
                     if (project.width && project.height && project.data) {
-                        fontWidth = project.width;
-                        fontHeight = project.height;
-                        fontData = project.data;
-                        
-                        let isExtended = project.extended !== undefined ? project.extended : (fontData.length > 95);
-                        extendedAsciiToggle.checked = isExtended;
-                        END_CHAR = isExtended ? 255 : 126;
-                        NUM_CHARS = END_CHAR - START_CHAR + 1;
-
+                        fontWidth = project.width; fontHeight = project.height; fontData = project.data;
+                        extendedAsciiToggle.checked = project.extended !== undefined ? project.extended : (fontData.length > 95);
                         document.getElementById('fontWidth').value = fontWidth;
                         document.getElementById('fontHeight').value = fontHeight;
-                        refreshUI();
+                        initFont(); // Recalculate parameters
                     } else alert("Invalid project file format.");
                 } catch (err) { alert("Error reading file."); }
             };
@@ -622,27 +647,10 @@
             event.target.value = ''; 
         }
 
-        // --- EXPORT FUNCTIONS ---
-
-        // 1. TTF Export using OpenType.js
         function exportToTtf() {
-            if (typeof opentype === 'undefined') {
-                alert("OpenType.js library is still loading or failed to load. Ensure you have an internet connection.");
-                return;
-            }
-
-            // We scale up the pixel grid to match standard font coordinate sizes
-            const scale = 100; // 1 pixel = 100 font units
-            
-            // Standard missing character glyph required by TTF format
-            const notdefGlyph = new opentype.Glyph({
-                name: '.notdef',
-                unicode: 0,
-                advanceWidth: fontWidth * scale,
-                path: new opentype.Path()
-            });
-
-            const glyphs = [notdefGlyph];
+            if (typeof opentype === 'undefined') { alert("OpenType.js library is loading. Ensure you have an internet connection."); return; }
+            const scale = 100;
+            const glyphs = [new opentype.Glyph({ name: '.notdef', unicode: 0, advanceWidth: fontWidth * scale, path: new opentype.Path() })];
 
             for (let i = 0; i < NUM_CHARS; i++) {
                 let asciiCode = i + START_CHAR;
@@ -652,48 +660,18 @@
                 for (let r = 0; r < fontHeight; r++) {
                     for (let c = 0; c < fontWidth; c++) {
                         if (charData && charData[r] && charData[r][c]) {
-                            // TTF coordinate system has Y going UP from baseline
-                            let x = c * scale;
-                            let y = (fontHeight - 1 - r) * scale; 
-                            
-                            // Draw a vector square (clockwise coordinates)
-                            path.moveTo(x, y);
-                            path.lineTo(x, y + scale);
-                            path.lineTo(x + scale, y + scale);
-                            path.lineTo(x + scale, y);
-                            path.close();
+                            let x = c * scale; let y = (fontHeight - 1 - r) * scale; 
+                            path.moveTo(x, y); path.lineTo(x, y + scale); path.lineTo(x + scale, y + scale); path.lineTo(x + scale, y); path.close();
                         }
                     }
                 }
-
-                let glyph = new opentype.Glyph({
-                    name: String.fromCharCode(asciiCode),
-                    unicode: asciiCode,
-                    advanceWidth: (fontWidth + 1) * scale, // Add 1 "pixel" of spacing automatically
-                    path: path
-                });
-                glyphs.push(glyph);
+                glyphs.push(new opentype.Glyph({ name: String.fromCharCode(asciiCode), unicode: asciiCode, advanceWidth: (fontWidth + 1) * scale, path: path }));
             }
-
-            const font = new opentype.Font({
-                familyName: `Pixel Font ${fontWidth}x${fontHeight}`,
-                styleName: 'Regular',
-                unitsPerEm: fontHeight * scale, // Map EM scale directly to font height
-                ascender: fontHeight * scale,
-                descender: 0,
-                glyphs: glyphs
-            });
-
-            // The OpenType.js library handles the binary compilation and trigger the download automatically
-            font.download(`pixel_font_${fontWidth}x${fontHeight}.ttf`);
+            new opentype.Font({ familyName: `Pixel Font ${fontWidth}x${fontHeight}`, styleName: 'Regular', unitsPerEm: fontHeight * scale, ascender: fontHeight * scale, descender: 0, glyphs: glyphs }).download(`pixel_font_${fontWidth}x${fontHeight}.ttf`);
         }
 
-        // 2. C++ Array Export
         function exportToCpp() {
-            let dataType = "uint8_t";
-            if (fontWidth > 8) dataType = "uint16_t";
-            if (fontWidth > 16) dataType = "uint32_t";
-
+            let dataType = "uint8_t"; if (fontWidth > 8) dataType = "uint16_t"; if (fontWidth > 16) dataType = "uint32_t";
             let cpp = `// Custom ${fontWidth}x${fontHeight} Pixel Font\n#ifndef CUSTOM_FONT_H\n#define CUSTOM_FONT_H\n\n#include <stdint.h>\n\nconst int FONT_WIDTH = ${fontWidth};\nconst int FONT_HEIGHT = ${fontHeight};\nconst int FONT_START_CHAR = ${START_CHAR};\nconst int FONT_END_CHAR = ${END_CHAR};\n\nconst ${dataType} custom_font[${NUM_CHARS}][${fontHeight}] = {\n`;
             for(let i = 0; i < NUM_CHARS; i++) {
                 let asciiCode = i + START_CHAR;
@@ -710,7 +688,6 @@
             downloadFile(cpp, `font_${fontWidth}x${fontHeight}.h`, 'text/plain');
         }
 
-        // 3. BDF Export
         function exportToBdf() {
             let bdf = `STARTFONT 2.1\nFONT -custom-font-medium-r-normal--${fontHeight}-${fontHeight}0-75-75-c-${fontWidth}0-iso10646-1\nSIZE ${fontHeight} 75 75\nFONTBOUNDINGBOX ${fontWidth} ${fontHeight} 0 0\nSTARTPROPERTIES 2\nFONT_ASCENT ${fontHeight}\nFONT_DESCENT 0\nENDPROPERTIES\nCHARS ${NUM_CHARS}\n`;
             const bytesPerRow = Math.ceil(fontWidth / 8);
@@ -722,8 +699,7 @@
                     for (let b = 0; b < bytesPerRow; b++) {
                         let byteVal = 0;
                         for (let bit = 0; bit < 8; bit++) {
-                            let c = b * 8 + bit;
-                            if (c < fontWidth && fontData[i][r][c]) byteVal |= (1 << (7 - bit));
+                            let c = b * 8 + bit; if (c < fontWidth && fontData[i][r][c]) byteVal |= (1 << (7 - bit));
                         }
                         rowHex += byteVal.toString(16).toUpperCase().padStart(2, '0');
                     }
@@ -735,7 +711,6 @@
             downloadFile(bdf, `font_${fontWidth}x${fontHeight}.bdf`, 'text/plain');
         }
 
-        // 4. PSF2 Export
         function exportToPsf() {
             const HEADER_SIZE = 32, totalGlyphs = END_CHAR + 1; 
             const bytesPerRow = Math.ceil(fontWidth / 8), bytesPerGlyph = fontHeight * bytesPerRow;
@@ -754,8 +729,7 @@
                     for (let b = 0; b < bytesPerRow; b++) {
                         let byteVal = 0;
                         for (let bit = 0; bit < 8; bit++) {
-                            let c = b * 8 + bit;
-                            if (c < fontWidth && hasData && fontData[dataIdx][r][c]) byteVal |= (1 << (7 - bit));
+                            let c = b * 8 + bit; if (c < fontWidth && hasData && fontData[dataIdx][r][c]) byteVal |= (1 << (7 - bit));
                         }
                         buffer[offset++] = byteVal;
                     }
@@ -768,8 +742,7 @@
             const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = filename;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         }
 
         window.onload = initFont;
